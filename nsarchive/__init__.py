@@ -11,8 +11,7 @@ class EntityInstance:
         self.base = self.db.Base('entities')
 
     def get_entity(self, id: str) -> User | Organization | Entity:
-        _base = self.base
-        _data = _base.get(id)
+        _data = self.base.get(id)
 
         if _data is None:
             return Entity("0")

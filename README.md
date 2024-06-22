@@ -2,6 +2,15 @@
 
 `nsarchive` est un module Python pour la gestion des entités (utilisateurs et organisations) à l'aide de la base de données Deta. Ce module permet de créer, récupérer, sauvegarder et gérer des entités et leurs attributs spécifiques.
 
+## Pré-requis
+
+Listes des choses à avoir afin de pouvoir utiliser le module correctement:
+- [Python 3.10](https://www.python.org/downloads/) ou supérieur
+- Un token [Deta](https://deta.space), donné par un administrateur ou pour votre collection personnelle
+- Un bon capuccino, pour commencer la programmation en bons termes
+
+> **Note:** Il vous faudra un token différent pour accéder aux différentes parties de la base de données. Vos tokens n'expireront pas à moins que l'ordre en aura été donné
+
 ## Installation
 
 Vous pouvez installer ce module via pip :

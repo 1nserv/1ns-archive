@@ -29,7 +29,7 @@ Pour utiliser `nsarchive`, commencez par importer le module et initialiser une i
 from nsarchive import EntityInstance
 
 # Remplacez 'your_deta_token' par votre véritable token Deta
-entity_instance = EntityInstance(token='your_deta_token')
+entity_instance = EntityInstance(token = 'your_deta_token')
 ```
 
 ### Récupérer une Entité
@@ -37,16 +37,20 @@ entity_instance = EntityInstance(token='your_deta_token')
 Vous pouvez récupérer une entité (Utilisateur ou Organisation) à l'aide de son ID.
 
 ```python
-entity = entity_instance.get_entity(id='entity_id')
+entity = entity_instance.get_entity(id = 'entity_id')
 print(entity.name)
 ```
+
+> **ATTENTION: Les entités sont identifiées sous une forme hexadécimale. Pour les avoir, vous devez convertir leur ID Discord en hexadécimale puis enlever le préfixe `0x`.**
+> Pour les organisations, l'ID Discord correspondra à la formule suivante: `ID fondateur // 100000`.
+> N'oubliez pas de toujours utiliser un `str` dans les ID pour interagir avec la base de données.
 
 ### Sauvegarder une Entité
 
 Après avoir modifié une entité, vous pouvez la sauvegarder dans la base de données.
 
 ```python
-entity.name = "Nouveau Nom"
+entity.rename("Nouveau Nom")
 entity_instance.save_entity(entity)
 ```
 
@@ -55,7 +59,7 @@ entity_instance.save_entity(entity)
 Vous pouvez rechercher des entités avec des critères spécifiques.
 
 ```python
-entities = entity_instance.fetch(query={'name': 'Alice'})
+entities = entity_instance.fetch(query = {'name': 'Alice'})
 for entity in entities:
     print(entity['name'])
 ```

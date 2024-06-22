@@ -1,0 +1,2 @@
+# Modules nécessaires pour le fonctionnement du projet
+deta==1.2.0

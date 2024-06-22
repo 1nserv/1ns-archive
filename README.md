@@ -41,9 +41,11 @@ entity = entity_instance.get_entity(id = 'entity_id')
 print(entity.name)
 ```
 
-> **ATTENTION: Les entités sont identifiées sous une forme hexadécimale. Pour les avoir, vous devez convertir leur ID Discord en hexadécimale puis enlever le préfixe `0x`.**
-> Pour les organisations, l'ID Discord correspondra à la formule suivante: `ID fondateur // 100000`.
-> N'oubliez pas de toujours utiliser un `str` dans les ID pour interagir avec la base de données.
+**ATTENTION: Les entités sont identifiées sous une forme hexadécimale. Pour les avoir, vous devez convertir leur ID Discord en hexadécimale puis enlever le préfixe `0x`.**
+
+Pour les organisations, l'ID Discord correspondra à la formule suivante: `ID fondateur // 100000`.
+
+N'oubliez pas de toujours utiliser un `str` dans les ID pour interagir avec la base de données.
 
 ### Sauvegarder une Entité
 

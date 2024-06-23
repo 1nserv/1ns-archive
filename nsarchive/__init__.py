@@ -68,7 +68,8 @@ class EntityInstance:
         _data = self.electors.get(id)
 
         if _data is None:
-            return Elector('0')
+            self.save_elector(Elector(id))
+            return Elector(id)
         
         elector = Elector(id)
         elector.votes = _data['votes']

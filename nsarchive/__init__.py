@@ -14,6 +14,7 @@ class EntityInstance:
         self.electors = self.db.Base('electors')
 
     def get_entity(self, id: str) -> User | Organization | Entity:
+        id = id.upper()
         _data = self.base.get(id)
 
         if _data is None:
@@ -32,7 +33,7 @@ class EntityInstance:
         entity.xp = _data['xp']
 
         if type(entity) == Organization:
-            entity.owner = self.get_entity(_data['owner_id'])
+            entity.owner = self.get_entity(_data['owner_id'].upper())
             entity.members = [
                 self.get_entity(_id) for _id in _data['members']
             ]
@@ -54,15 +55,16 @@ class EntityInstance:
         }
 
         if type(entity) == Organization:
-            _data['owner_id'] = entity.owner.id if entity.owner else Entity(0)
-            _data['members'] = [ member.id for member in entity.members ] if entity.members else []
+            _data['owner_id'] = entity.owner.id.upper() if entity.owner else Entity("0")
+            _data['members'] = [ member.id.upper() for member in entity.members ] if entity.members else []
             _data['certifications'] = entity.certifications
         elif type(entity) == User:
             _data['boosts'] = entity.boosts
 
-        _base.put(_data, entity.id, expire_in = 3 * 31536000) # Données supprimées tous les trois ans
+        _base.put(_data, entity.id.upper(), expire_in = 3 * 31536000) # Données supprimées tous les trois ans
 
     def get_elector(self, id: str) -> Elector:
+        id = id.upper()
         _data = self.electors.get(id)
 
         if _data is None:
@@ -78,7 +80,7 @@ class EntityInstance:
             "votes": elector.votes
         }
 
-        self.electors.put(_data, elector.id)
+        self.electors.put(_data, elector.id.upper())
 
     def fetch(self, query = None, listquery: dict | None = None) -> list:
         _res = self.base.fetch(query).items
@@ -102,6 +104,7 @@ class RepublicInstance:
         self.votes = self.db.Base('votes')
 
     def get_vote(self, id: str) -> Vote | ClosedVote:
+        id = id.upper()
         _data = self.votes.get(id)
 
         if _data is None:
@@ -132,4 +135,4 @@ class RepublicInstance:
             'choices': vote.choices
         }
 
-        _base.put(_data, vote.id)
+        _base.put(_data, vote.id.upper())

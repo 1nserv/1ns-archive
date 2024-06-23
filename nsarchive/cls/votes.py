@@ -7,7 +7,7 @@ class Vote:
         self.id: str = id
         self.title: str = title
         self.choices = { choice : 0 for choice in choices }
-        self.author: FunctionalUser
+        self.author: str = "0"
         self.startDate: int = 0
         self.endDate: int = 0
 

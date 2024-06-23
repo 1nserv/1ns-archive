@@ -125,7 +125,6 @@ class RepublicInstance:
         return vote
 
     def save_vote(self, vote: Vote | ClosedVote):
-        _base = self.base
         _data = {
             '_type': 'open' if type(vote) == Vote else 'closed' if type(vote) == ClosedVote else 'unknown',
             'title': vote.title,
@@ -135,4 +134,4 @@ class RepublicInstance:
             'choices': vote.choices
         }
 
-        _base.put(_data, vote.id.upper())
+        self.votes.put(_data, vote.id.upper())

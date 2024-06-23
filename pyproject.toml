@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "nsarchive"
-version = "0.2-alpha.0"
+version = "0.0.3-alpha"
 description = ""
 authors = ["happex <110610727+okayhappex@users.noreply.github.com>"]
 license = "GPL-3.0"

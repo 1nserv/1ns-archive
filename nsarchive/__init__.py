@@ -55,7 +55,7 @@ class EntityInstance:
         }
 
         if type(entity) == Organization:
-            _data['owner_id'] = entity.owner.upper() if entity.owner else "0"
+            _data['owner_id'] = entity.owner.id.upper() if entity.owner else "0"
             _data['members'] = [ member.id.upper() for member in entity.members ] if entity.members else []
             _data['certifications'] = entity.certifications
         elif type(entity) == User:

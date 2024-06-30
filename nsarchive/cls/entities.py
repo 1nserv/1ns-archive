@@ -63,3 +63,28 @@ class Organization(Entity):
     
     def set_owner(self, member: User) -> None:
         self.owner = member
+
+class Elector(User):
+    def __init__(self, id: str) -> None:
+        self.id: str = id
+        self.votes: list[str] = []
+
+class FunctionalUser(User):
+    def __init__(self, id: str):
+        super().__init__(id)
+
+        self.permissions: dict = {
+            'approve_project': False,
+            'create_org': False,
+            'destroy_gov': False,
+            'destroy_org': False,
+            'propose_projects': False
+        }
+
+        self.mandates: int = 0
+        self.contribs: dict = {
+            'projects': 0,
+            'approved_projects': 0, 
+            'admin_actions': 0, 
+            'law_votes': 0
+        }

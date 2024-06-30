@@ -4,6 +4,7 @@ import deta
 
 from .cls.entities import *
 from .cls.votes import *
+from .cls.bank import *
 
 from .cls.exceptions import *
 
@@ -136,3 +137,34 @@ class RepublicInstance:
         }
 
         self.votes.put(_data, vote.id.upper())
+
+class BankInstance:
+    def __init__(self, token: str) -> None:
+        self.db = deta.Deta(token)
+        self.accounts = self.db.Base('accounts')
+        self.registry = self.db.Base('banks')
+
+    def get_account(self, id: str) -> BankAccount:
+        id = id.upper()
+        _data = self.accounts.get(id)
+
+        if _data is None:
+            return None
+        
+        acc = BankAccount(id)
+        acc.amount = _data['amount']
+        acc.locked = _data['locked']
+        acc.owner = _data['owner_id']
+        acc.bank = _data['bank']
+
+        return acc
+
+    def save_account(self, acc: BankAccount):
+        _data = {
+            'amount': acc.amount,
+            'locked': acc.locked, 
+            'owner_id': acc.owner, 
+            'bank': acc.bank
+        }
+
+        self.accounts.put(_data, acc.id.upper())

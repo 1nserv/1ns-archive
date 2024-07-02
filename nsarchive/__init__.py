@@ -58,7 +58,7 @@ class EntityInstance:
         if type(entity) == Organization:
             _data['owner_id'] = entity.owner.id.upper() if entity.owner else "0"
             _data['members'] = [ member.id.upper() for member in entity.members ] if entity.members else []
-            _data['certifications'] = entity.certifications
+            _data['certifications']  = entity.certifications
         elif type(entity) == User:
             _data['boosts'] = entity.boosts
 
@@ -89,21 +89,22 @@ class EntityInstance:
 
         if listquery is not None:
             for item in _res:
-                for target, value in listquery:
+                for target, value in listquery.items():
                     if value not in item[target]:
                         _res.remove(item)
         
         return _res
 
-    def get_entity_groups(self, id: int) -> list[Organization]:
-        groups = self.fetch({'_type': 'organization'}, {'members': str(id)})
+    def get_entity_groups(self, id: str) -> list[Organization]:
+        groups = self.fetch({'_type': 'organization'}, {'members': id})
         
-        return [ self.get_entity(int(group['id'], 16)) for group in groups ]
+        return [ self.get_entity(group['key']) for group in groups ]
 
 class RepublicInstance:
     def __init__(self, token: str) -> None:
         self.db = deta.Deta(token)
         self.votes = self.db.Base('votes')
+        self.archives = self.db.Base('archives')
 
     def get_vote(self, id: str) -> Vote | ClosedVote:
         id = id.upper()

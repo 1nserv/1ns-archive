@@ -3,6 +3,7 @@ import time
 import deta
 
 from .cls.entities import *
+from .cls.archives import *
 from .cls.votes import *
 from .cls.bank import *
 
@@ -13,6 +14,7 @@ class EntityInstance:
         self.db = deta.Deta(token)
         self.base = self.db.Base('entities')
         self.electors = self.db.Base('electors')
+        self.archives = self.db.Base('archives')
 
     def get_entity(self, id: str) -> User | Organization | Entity:
         id = id.upper()
@@ -99,12 +101,52 @@ class EntityInstance:
         groups = self.fetch({'_type': 'organization'}, {'members': id})
         
         return [ self.get_entity(group['key']) for group in groups ]
+    
+    def _add_archive(self, archive: Action):
+        _data = archive.__dict__
 
+        if type(archive) == ModAction:
+            _data['type'] = "sanction"
+        elif type(archive) == AdminAction:
+            _data['type'] = "adminaction"
+        else:
+            _data['type'] = "unknown"
+        
+        del _data['id']
+
+        self.archives.put(key = archive.id, data = _data)
+
+    def _get_archive(self, id: str) -> Action | ModAction | AdminAction:
+        _data = self.archives.get(id)
+
+        if _data is None:
+            return None
+        
+        if _data['type'] == "sanction": # Mute, ban, GAV, kick, détention, prune (xp seulement)
+            archive = ModAction(id, _data['author'], _data['target'])
+
+            archive.details = _data['details']
+            archive.major = _data['major']
+            archive.duration = _data['duration']
+        elif _data['type'] == "adminaction": # Renommage, promotion, démotion
+            archive = AdminAction(id, _data['author'], _data['target'])
+
+            archive.details = _data['details']
+            archive.new_state = _data['new_state']
+        else:
+            archive = Action(id, _data['author'], _data['target'])
+        
+        archive.action = _data['action']
+        archive.date = _data['date']
+
+        return archive
+    
 class RepublicInstance:
     def __init__(self, token: str) -> None:
         self.db = deta.Deta(token)
         self.votes = self.db.Base('votes')
         self.archives = self.db.Base('archives')
+        self.functions = self.db.base('functions') # Liste des fonctionnaires
 
     def get_vote(self, id: str) -> Vote | ClosedVote:
         id = id.upper()
@@ -139,6 +181,46 @@ class RepublicInstance:
 
         self.votes.put(_data, vote.id.upper())
 
+    def _add_archive(self, archive: Action):
+        _data = archive.__dict__
+
+        if type(archive) == Election:
+            _data['type'] = "election"
+        elif type(archive) == Promotion:
+            _data['type'] = "promotion"
+        elif type(archive) == Demotion:
+            _data['type'] = "demotion"
+        else:
+            _data['type'] = "unknown"
+        
+        del _data['id']
+
+        self.archives.put(key = archive.id, data = _data)
+
+    def _get_archive(self, id: str) -> Action | Election | Promotion | Demotion:
+        _data = self.archives.get(id)
+
+        if _data is None:
+            return None
+        
+        if _data['type'] == "election":
+            archive = Election(id, _data['author'], _data['target'], _data['position'])
+
+            archive.positive_votes = _data['positive_votes']
+            archive.total_votes = _data['total_votes']
+        elif _data['type'] == "adminaction": # Renommage, promotion, démotion
+            archive = AdminAction(id, _data['author'], _data['target'])
+
+            archive.details = _data['details']
+            archive.new_state = _data['new_state']
+        else:
+            archive = Action(id, _data['author'], _data['target'])
+        
+        archive.action = _data['action']
+        archive.date = _data['date']
+
+        return archive
+
 class BankInstance:
     def __init__(self, token: str) -> None:
         self.db = deta.Deta(token)
@@ -169,3 +251,34 @@ class BankInstance:
         }
 
         self.accounts.put(_data, acc.id.upper())
+
+    def _add_archive(self, archive: Action):
+        _data = archive.__dict__
+
+        if type(archive) == Transaction:
+            _data['type'] = "transaction"
+        else:
+            _data['type'] = "unknown"
+        
+        del _data['id']
+
+        self.archives.put(key = archive.id, data = _data)
+
+    def _get_archive(self, id: str) -> Action | Transaction:
+        _data = self.archives.get(id)
+
+        if _data is None:
+            return None
+        
+        if _data['type'] == "transaction":
+            archive = Transaction(id, _data['author'], _data['target'], _data['amount'])
+
+            archive.reason = _data['reason']
+            archive.currency = _data['currency']
+        else:
+            archive = Action(id, _data['author'], _data['target'])
+        
+        archive.action = _data['action']
+        archive.date = _data['date']
+
+        return archive

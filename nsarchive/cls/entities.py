@@ -5,7 +5,7 @@ from .exceptions import *
 class Entity:
     def __init__(self, id: str):
         self.id: str = id # ID hexadécimal de l'entité
-        self.name: str = 'Entité Inconnue'
+        self.name: str = "Entité Inconnue"
         self.registerDate: int = 0
         self.legalPosition: int = 'Normal'
         self.xp: int = 0

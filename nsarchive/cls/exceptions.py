@@ -8,6 +8,9 @@ class EntityTypeError(Exception):
     def __init__(self, *args: object) -> None:
         super().__init__(*args)
 
+class AvatarTooLongError(Exception):
+    def __init__(self, *args: object) -> None:
+        super().__init__(*args)
 
 # Exceptions pour le vote
 

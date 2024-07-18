@@ -61,7 +61,7 @@ entity_instance.save_entity(entity)
 Vous pouvez rechercher des entités avec des critères spécifiques.
 
 ```python
-entities = entity_instance.fetch(query = {'name': 'Alice'})
+entities = entity_instance.fetch_entity(query = {'name': 'Alice'})
 for entity in entities:
     print(entity['name'])
 ```

@@ -161,5 +161,6 @@ cython_debug/
 
 # Tests
 test/*
+tests/*
 *.test.*
 test.*

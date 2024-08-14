@@ -17,3 +17,9 @@ class AvatarTooLongError(Exception):
 class AlreadyVotedError(Exception):
     def __init__(self, *args: object) -> None:
         super().__init__(*args)
+
+# Ressource pas trouvée
+
+class RessourceNotFoundError(Exception):
+    def __init__(self, *args: object) -> None:
+        super().__init__(*args)

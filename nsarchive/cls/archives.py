@@ -1,7 +1,7 @@
 import time
 
 class Action:
-    def __init__(self, author: str = '11625D9061021010', target: str = '0') -> None:
+    def __init__(self, author: str = '0', target: str = '0') -> None:
         self.id: str = hex(round(time.time()))[2:].upper()
         self.date: int = int(self.id, 16)
         self.action: str = ""
@@ -49,6 +49,7 @@ class Demotion(Action):
 
         self.reason: str = None
 
+
 # Bank
 
 class Transaction(Action):
@@ -58,3 +59,9 @@ class Transaction(Action):
         self.amount: int = amount
         self.currency: str = 'HC'
         self.reason: str = None
+
+class Sale(Action):
+    def __init__(self, author: str = '0', target: str = '0') -> None:
+        super().__init__(author, target)
+
+        self.price: int = 0

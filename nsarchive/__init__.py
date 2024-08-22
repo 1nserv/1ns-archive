@@ -11,6 +11,16 @@ from .cls.economy import *
 from .cls.exceptions import *
 
 class EntityInstance:
+    """
+    Instance qui vous permettra d'interagir avec les profils des membres ainsi que les différents métiers et secteurs d'activité.
+
+    ## Informations disponibles
+    - Profil des membres et des entreprises: `.User | .Organization | .Entity`
+    - Participation d'un membre à différent votes: `.User | .Organization | .Entity`
+    - Appartenance et permissions d'un membre dans un groupe: `.GroupMember.MemberPermissions`
+    - Position légale et permissions d'une entité: `.Position.Permissions`
+    - Sanctions et modifications d'une entité: `.Action[ .AdminAction | .Sanction ]`
+    """
     def __init__(self, token: str) -> None:
         self.db = deta.Deta(token)
         self.base = self.db.Base('entities')
@@ -124,6 +134,18 @@ class EntityInstance:
             self.avatars.delete(NSID(entity.id))
 
     def fetch_entities(self, query: dict = None, listquery: dict | None = None) -> list[ Entity | User | Organization ]:
+        """
+        Récupère une liste d'entités en fonction d'une requête.
+
+        ## Paramètres
+        query: `dict`
+            La requête pour filtrer les entités.
+        listquery: `dict | None`
+            Requête secondaire pour n'afficher que les listes contenant un certain élément.
+
+        ## Renvoie
+        - `list[Entity | User | Organization]`
+        """
         _res = self.base.fetch(query).items
 
         if listquery is not None:
@@ -135,13 +157,34 @@ class EntityInstance:
         return [ self.get_entity(NSID(entity['key'])) for entity in _res ]
 
     def get_entity_groups(self, id: str | NSID) -> list[Organization]:
+        """
+        Récupère les groupes auxquels appartient une entité.
+
+        ## Paramètres
+        id: `str | NSID`
+            ID de l'entité.
+
+        ## Renvoie
+        - `list[Organization]`
+        """
+
         id = NSID(id)
         groups = self.fetch_entities({'_type': 'organization'}, {'members': id})
         
         return groups
 
-    def get_position(self, id: str | NSID) -> Position:
-        id = NSID(id)
+    def get_position(self, id: str) -> Position:
+        """
+        Récupère une position légale (métier, domaine professionnel).
+
+        ## Paramètres
+        id: `str`
+            ID de la position (SENSIBLE À LA CASSE !)
+
+        ## Renvoie
+        - `.Position`
+        """
+
         _data = self.positions.get(id)
 
         if _data is None:
@@ -156,6 +199,10 @@ class EntityInstance:
         return position
 
     def _add_archive(self, archive: Action) -> None:
+        """
+        Ajoute une archive d'une action (modification au sein d'un groupe ou sanction) dans la base de données.
+        """
+
         archive.id = NSID(archive.id)
         archive.author = NSID(archive.author)
         archive.target = NSID(archive.target)
@@ -172,6 +219,17 @@ class EntityInstance:
         self.archives.put(key = archive.id, data = _data)
 
     def _get_archive(self, id: str | NSID) -> Action | Sanction | AdminAction:
+        """
+        Récupère une archive spécifique.
+
+        ## Paramètres
+        id: `str | NSID`
+            ID de l'archive.
+
+        ## Renvoie
+        - `.Action | .Sanction | .AdminAction`
+        """
+
         id = NSID(id)
         _data = self.archives.get(id)
 
@@ -199,12 +257,34 @@ class EntityInstance:
         return archive
 
     def _fetch_archives(self, **query) -> list[ Action | Sanction | AdminAction ]:
+        """
+        Récupère une liste d'archives correspondant à la requête.
+
+        ## Paramètres
+        query: `dict`
+            Requête pour filtrer les archives.
+
+        ## Renvoie
+        - `list[Action | Sanction | AdminAction]`
+        """
+
         _res = self.archives.fetch(query).items
         
         return [ self._get_archive(archive['key']) for archive in _res ]
 
 class RepublicInstance:
+    """
+    Gère les interactions avec les votes, les archives de la république, et les fonctionnaires.
+
+    ## Informations
+    - Résultats des votes: `.Vote | .ClosedVote`
+    - Différentes institutions: `.Institutions | .Administration | .Government | .Assembly | .Court | .PoliceForces`
+    - Occupants des différents rôles et historique de leurs actions: `.Official`
+    """
+
     def __init__(self, token: str) -> None:
+        """Initialise une nouvelle RepublicInstance avec un token Deta."""
+
         self.db = deta.Deta(token)
         self.votes = self.db.Base('votes')
         self.archives = self.db.Base('archives')
@@ -212,6 +292,17 @@ class RepublicInstance:
         self.functions = self.db.Base('functions') # Liste des fonctionnaires
 
     def get_vote(self, id: str | NSID) -> Vote | ClosedVote:
+        """
+        Récupère un vote spécifique.
+
+        ## Paramètres
+        id: `str | NSID`
+            ID du vote.
+
+        ## Renvoie
+        - `.Vote | .ClosedVote`
+        """
+
         id = NSID(id)
         _data = self.votes.get(id)
 
@@ -233,6 +324,8 @@ class RepublicInstance:
         return vote
 
     def save_vote(self, vote: Vote | ClosedVote) -> None:
+        """Sauvegarde un vote dans la base de données."""
+
         vote.id = NSID(vote.id)
 
         _data = {
@@ -247,6 +340,19 @@ class RepublicInstance:
         self.votes.put(_data, vote.id)
 
     def get_official(self, id: str | NSID, current_mandate: bool = True) -> Official:
+        """
+        Récupère les informations d'un fonctionnaire (mandats, contributions).
+
+        ## Paramètres
+        id: `str | NSID`
+            ID du fonctionnaire.
+        current_mandate: `bool`
+            Indique si l'on doit récupérer le mandat actuel ou les anciens mandats.
+
+        ## Renvoie
+        - `.Official`
+        """
+
         id = NSID(id)
 
         archives = self.mandate if current_mandate else self.archives
@@ -274,6 +380,8 @@ class RepublicInstance:
         return user
 
     def get_institutions(self) -> Organization:
+        """Récupère l'état actuel des institutions de la république."""
+
         admin = Administration()
         gov = Government(Official('0'))
         assembly = Assembly()
@@ -351,6 +459,8 @@ class RepublicInstance:
         self.update_institutions(institutions)
 
     def _add_archive(self, archive: Action) -> None:
+        """Ajoute une archive d'une action (élection, promotion, ou rétrogradation) dans la base de données."""
+
         archive.id = NSID(archive.id)
         _data = archive.__dict__.copy()
 
@@ -367,6 +477,17 @@ class RepublicInstance:
         self.mandate.put(key = archive.id, data = _data) # Ajouter les archives à celle du mandat actuel
 
     def _get_archive(self, id: str | NSID) -> Action | Election | Promotion | Demotion:
+        """
+        Récupère une archive spécifique.
+
+        ## Paramètres
+        id: `str | NSID`
+            ID de l'archive.
+
+        ## Renvoie
+        - `.Action | .Election | .Promotion | .Demotion`
+        """
+
         id = NSID(id)
         _data = self.archives.get(id)
 
@@ -394,11 +515,24 @@ class RepublicInstance:
         return archive
 
     def _fetch_archives(self, **query) -> list[ Action | Election | Promotion | Demotion ]:
+        """
+        Récupère une liste d'archives correspondant à la requête.
+
+        ## Paramètres
+        query: `dict`
+            Requête pour filtrer les archives.
+
+        ## Renvoie
+        - `list[Action | Election | Promotion | Demotion]`
+        """
+
         _res = self.archives.fetch(query).items
         
         return [ self._get_archive(archive['key']) for archive in _res ]
 
 class BankInstance:
+    """Gère les interactions avec les comptes bancaires, les transactions, et le marché."""
+
     def __init__(self, token: str) -> None:
         self.db = deta.Deta(token)
         self.archives = self.db.Base('archives')
@@ -407,6 +541,17 @@ class BankInstance:
         self.marketplace = self.db.Base('shop')
 
     def get_account(self, id: str | NSID) -> BankAccount:
+        """
+        Récupère les informations d'un compte bancaire.
+
+        ## Paramètres
+        id: `str | NSID`
+            ID du compte.
+
+        ## Renvoie
+        - `.BankAccount`
+        """
+
         id = NSID(id)
         _data = self.accounts.get(id)
 
@@ -422,6 +567,8 @@ class BankInstance:
         return account
 
     def save_account(self, account: BankAccount):
+        """Sauvegarde un compte bancaire dans la base de données."""
+
         _data = {
             'amount': account.amount,
             'locked': account.locked, 
@@ -432,13 +579,26 @@ class BankInstance:
         self.accounts.put(_data, NSID(account.id))
 
     def lock_account(self, account: BankAccount):
+        """Verrouille un compte bancaire pour empêcher toute transaction."""
+
         account.id = account.id.upper()
         account.locked = True
 
         self.save_account(account)
 
-    def get_item(self, id: str) -> Item | None:
-        id = id.upper()
+    def get_item(self, id: str | NSID) -> Item | None:
+        """
+        Récupère un item du marché.
+
+        ## Paramètres
+        id: `str | NSID`
+            ID de l'item.
+
+        ## Renvoie
+        - `.Item | None`
+        """
+
+        id = NSID(id)
 
         _data = self.marketplace.get(id)
 
@@ -454,20 +614,26 @@ class BankInstance:
         return item
 
     def save_item(self, item: Item) -> None:
-        item.id = item.id.upper()
+        """Sauvegarde un item dans la base de données du marché."""
+
+        item.id = NSID(item.id)
 
         _data = item.__dict__.copy()
 
-        self.marketplace.put(key = id, data = _data)
+        self.marketplace.put(key = item.id, data = _data)
 
     def delete_item(self, item: Item) -> None:
-        item.id = item.id.upper()
+        """Supprime un item du marché."""
+
+        item.id = NSID(item.id)
         self.marketplace.delete(item.id)
 
     def _add_archive(self, archive: Action):
-        archive.id = archive.id.upper()
-        archive.author = archive.author.upper()
-        archive.target = archive.target.upper()
+        """Ajoute une archive d'une transaction ou d'une vente dans la base de données."""
+
+        archive.id = NSID(archive.id)
+        archive.author = NSID(archive.author)
+        archive.target = NSID(archive.target)
 
         _data = archive.__dict__.copy()
 
@@ -481,8 +647,19 @@ class BankInstance:
 
         self.archives.put(key = archive.id, data = _data)
 
-    def _get_archive(self, id: str) -> Action | Transaction:
-        id = id.upper()
+    def _get_archive(self, id: str | NSID) -> Action | Transaction:
+        """
+        Récupère une archive spécifique.
+
+        ## Paramètres
+        id: `str | NSID`
+            ID de l'archive.
+
+        ## Renvoie
+        - `.Action | .Transaction`
+        """
+
+        id = NSID(id)
         _data = self.archives.get(id)
 
         if _data is None:
@@ -507,6 +684,17 @@ class BankInstance:
         return archive
 
     def _fetch_archives(self, **query) -> list[ Action | Transaction ]:
+        """
+        Récupère une liste d'archives correspondant à la requête.
+
+        ## Paramètres
+        query: `dict`
+            Requête pour filtrer les archives.
+
+        ## Renvoie
+        - `list[Action | Transaction]`
+        """
+        
         _res = self.archives.fetch(query).items
 
         return [ self._get_archive(archive['key']) for archive in _res ]

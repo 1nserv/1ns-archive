@@ -58,7 +58,7 @@ class EntityInstance:
             try:
                 entity.avatar = self.avatars.get(id).read()
             except: 
-                entity.avatar = self.avatars.get('0').read()
+                entity.avatar = None
 
             entity.certifications = _data['certifications']
         else:

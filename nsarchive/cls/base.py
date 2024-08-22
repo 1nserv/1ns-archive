@@ -13,18 +13,15 @@ class NSID(str):
     interior_department = "103"
 
     def __new__(cls, value):
-        instance = super(NSID, cls).__new__(cls, value)
-        return instance
-
-    def __init__(self, value: str | int = ""):
         if type(value) == int:
             value = hex(value)
         elif type(value) in (str, NSID):
             value = hex(int(value, 16))
         else:
             return TypeError(f"<{value}> is not NSID serializable")
-
+        
         if value.startswith("0x"):
             value = value[2:]
-
-        self.value = value.upper()
+        
+        instance = super(NSID, cls).__new__(cls, value.upper())
+        return instance

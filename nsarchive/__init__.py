@@ -2,6 +2,7 @@ import time
 
 import deta
 
+from .cls.base import *
 from .cls.entities import *
 from .cls.archives import *
 from .cls.republic import *
@@ -18,12 +19,12 @@ class EntityInstance:
         self.avatars = self.db.Drive('avatars')
         self.positions = self.db.Base('positions') # Liste des métiers
 
-    def get_entity(self, id: str) -> User | Organization | Entity:
+    def get_entity(self, id: str | NSID) -> User | Organization | Entity:
         """
         Fonction permettant de récupérer le profil public d'une entité.\n
 
         ## Paramètres
-        id: `str`\n
+        id: `NSID`\n
             ID héxadécimal de l'entité à récupérer
 
         ## Renvoie
@@ -32,7 +33,7 @@ class EntityInstance:
         - `.Entity` dans le cas où c'est indéterminé
         """
 
-        id = id.upper()
+        id = NSID(id)
         _data = self.base.get(id)
         _votes = self.electors.get(id)
 
@@ -44,11 +45,11 @@ class EntityInstance:
 
             entity.xp = _data['xp']
             entity.boosts = _data['boosts']
-            entity.votes = [ vote.upper() for vote in _votes['votes'] ]
+            entity.votes = [ NSID(vote) for vote in _votes['votes'] ]
         elif _data['_type'] == 'organization':
             entity = Organization(id)
 
-            entity.owner = self.get_entity(_data['owner_id'].upper())
+            entity.owner = self.get_entity(NSID(_data['owner_id']))
             
             for _member in _data['members']:
                 member = GroupMember(_member['id'])
@@ -75,7 +76,7 @@ class EntityInstance:
             L'entité à sauvegarder
         """
 
-        entity.id = entity.id.upper()
+        entity.id = NSID(entity.id)
 
         _base = self.base
         _data = {
@@ -86,13 +87,13 @@ class EntityInstance:
         }
 
         if type(entity) == Organization:
-            _data['owner_id'] = entity.owner.id.upper() if entity.owner else "0"
+            _data['owner_id'] = NSID(entity.owner.id) if entity.owner else NSID("0")
             _data['members'] = []
             _data['certifications'] = entity.certifications
 
             for member in entity.members:
                 _member = {
-                    'id': member.id.upper(),
+                    'id': NSID(member.id),
                     'permissions': member.permissions.__dict__.copy()
                 }
 
@@ -114,10 +115,10 @@ class EntityInstance:
             L'entité à supprimer
         """
 
-        self.base.delete(entity.id.upper())
+        self.base.delete(NSID(entity.id))
 
         if type(entity) == Organization:
-            self.avatars.delete(entity.id.upper())
+            self.avatars.delete(NSID(entity.id))
 
     def fetch_entities(self, query: dict = None, listquery: dict | None = None) -> list[ Entity | User | Organization ]:
         _res = self.base.fetch(query).items
@@ -128,16 +129,16 @@ class EntityInstance:
                     if value not in item[target]:
                         _res.remove(item)
 
-        return [ self.get_entity(entity['key']) for entity in _res ]
+        return [ self.get_entity(NSID(entity['key'])) for entity in _res ]
 
-    def get_entity_groups(self, id: str) -> list[Organization]:
-        id = id.upper()
+    def get_entity_groups(self, id: str | NSID) -> list[Organization]:
+        id = NSID(id)
         groups = self.fetch_entities({'_type': 'organization'}, {'members': id})
         
         return groups
 
-    def get_position(self, id: str) -> Position:
-        id = id.upper()
+    def get_position(self, id: str | NSID) -> Position:
+        id = NSID(id)
         _data = self.positions.get(id)
 
         if _data is None:
@@ -152,9 +153,9 @@ class EntityInstance:
         return position
 
     def _add_archive(self, archive: Action) -> None:
-        archive.id = archive.id.upper()
-        archive.author = archive.author.upper()
-        archive.target = archive.target.upper()
+        archive.id = NSID(archive.id)
+        archive.author = NSID(archive.author)
+        archive.target = NSID(archive.target)
 
         _data = archive.__dict__.copy()
 
@@ -167,8 +168,8 @@ class EntityInstance:
         
         self.archives.put(key = archive.id, data = _data)
 
-    def _get_archive(self, id: str) -> Action | Sanction | AdminAction:
-        id = id.upper()
+    def _get_archive(self, id: str | NSID) -> Action | Sanction | AdminAction:
+        id = NSID(id)
         _data = self.archives.get(id)
 
         if _data is None:
@@ -207,8 +208,8 @@ class RepublicInstance:
         self.mandate = self.db.Base('mandate')
         self.functions = self.db.Base('functions') # Liste des fonctionnaires
 
-    def get_vote(self, id: str) -> Vote | ClosedVote:
-        id = id.upper()
+    def get_vote(self, id: str | NSID) -> Vote | ClosedVote:
+        id = NSID(id)
         _data = self.votes.get(id)
 
         if _data is None:
@@ -229,12 +230,12 @@ class RepublicInstance:
         return vote
 
     def save_vote(self, vote: Vote | ClosedVote) -> None:
-        vote.id = vote.id.upper()
+        vote.id = NSID(vote.id)
 
         _data = {
             '_type': 'open' if type(vote) == Vote else 'closed' if type(vote) == ClosedVote else 'unknown',
             'title': vote.title,
-            'author': vote.author.upper(),
+            'author': NSID(vote.author),
             'startDate': vote.startDate,
             'endDate': vote.endDate,
             'choices': vote.choices
@@ -242,8 +243,8 @@ class RepublicInstance:
 
         self.votes.put(_data, vote.id)
 
-    def get_official(self, id: str, current_mandate: bool = True) -> Official:
-        id = id.upper()
+    def get_official(self, id: str | NSID, current_mandate: bool = True) -> Official:
+        id = NSID(id)
 
         archives = self.mandate if current_mandate else self.archives
 
@@ -347,7 +348,7 @@ class RepublicInstance:
         self.update_institutions(institutions)
 
     def _add_archive(self, archive: Action) -> None:
-        archive.id = archive.id.upper()
+        archive.id = NSID(archive.id)
         _data = archive.__dict__.copy()
 
         if type(archive) == Election:
@@ -362,8 +363,8 @@ class RepublicInstance:
         self.archives.put(key = archive.id, data = _data)
         self.mandate.put(key = archive.id, data = _data) # Ajouter les archives à celle du mandat actuel
 
-    def _get_archive(self, id: str) -> Action | Election | Promotion | Demotion:
-        id = id.upper()
+    def _get_archive(self, id: str | NSID) -> Action | Election | Promotion | Demotion:
+        id = NSID(id)
         _data = self.archives.get(id)
 
         if _data is None:
@@ -402,8 +403,8 @@ class BankInstance:
         self.registry = self.db.Base('banks')
         self.marketplace = self.db.Base('shop')
 
-    def get_account(self, id: str) -> BankAccount:
-        id = id.upper()
+    def get_account(self, id: str | NSID) -> BankAccount:
+        id = NSID(id)
         _data = self.accounts.get(id)
 
         if _data is None:
@@ -425,7 +426,7 @@ class BankInstance:
             'bank': account.bank
         }
 
-        self.accounts.put(_data, account.id.upper())
+        self.accounts.put(_data, NSID(account.id))
 
     def lock_account(self, account: BankAccount):
         account.id = account.id.upper()

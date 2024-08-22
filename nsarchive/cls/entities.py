@@ -2,6 +2,7 @@ import io
 import time
 
 from .exceptions import *
+from .base import *
 
 from ..utils import assets
 
@@ -37,8 +38,8 @@ class Position:
         self.id = id
         self.permissions: PositionPermissions = PositionPermissions()
 class Entity:
-    def __init__(self, id: str) -> None:
-        self.id: str = id # ID hexadécimal de l'entité (ou nom dans le cas de l'entreprise)
+    def __init__(self, id: str | NSID) -> None:
+        self.id: NSID = NSID(id) # ID hexadécimal de l'entité (ou nom dans le cas de l'entreprise)
         self.name: str = "Entité Inconnue"
         self.registerDate: int = 0
         self.legalPosition: Position = Position()
@@ -53,16 +54,16 @@ class Entity:
         self.legalPosition = position
 
 class User(Entity):
-    def __init__(self, id: str) -> None:
-        super().__init__(id)
+    def __init__(self, id: str | NSID) -> None:
+        super().__init__(NSID(id))
 
         self.xp: int = 0
         self.boosts: dict[str, int] = {}
         self.permissions: PositionPermissions = PositionPermissions() # Elles seront définies en récupérant les permissions de sa position
         self.votes: list[str] = []
 
-    def add_vote(self, id: str):
-        self.votes.append(id)
+    def add_vote(self, id: str | NSID):
+        self.votes.append(NSID(id))
 
     def get_level(self) -> None:
         i = 0
@@ -97,14 +98,14 @@ class MemberPermissions:
             self.__setattr__(*perm)
 
 class GroupMember():
-    def __init__(self, id: str) -> None:
-        self.id = id
+    def __init__(self, id: str | NSID) -> None:
+        self.id: NSID = NSID(id)
         self.permissions: MemberPermissions = MemberPermissions()
         self.position: str = 'membre'
 
 class Official:
-    def __init__(self, id: str) -> None:
-        self.id: str = id
+    def __init__(self, id: str | NSID) -> None:
+        self.id: NSID = NSID(id)
 
         self.mandates: int = {
             'PRE_REP': 0, # Président de la République
@@ -122,8 +123,8 @@ class Official:
         }
 
 class Organization(Entity):
-    def __init__(self, id: str) -> None:
-        super().__init__(id)
+    def __init__(self, id: str | NSID) -> None:
+        super().__init__(NSID(id))
 
         self.owner: Entity
         self.certifications: dict = {}

@@ -1,18 +1,21 @@
 import time
 
+from .base import *
+
 class Action:
-    def __init__(self, author: str = '0', target: str = '0') -> None:
-        self.id: str = hex(round(time.time()))[2:].upper()
-        self.date: int = int(self.id, 16)
+    def __init__(self, author: str | NSID = '0', target: str | NSID = '0') -> None:
+        self.date: int = round(time.time())
+
+        self.id: NSID = NSID(self.date)
         self.action: str = ""
-        self.author: str = author
-        self.target: str = target
+        self.author: NSID = NSID(author)
+        self.target: NSID = NSID(target)
 
 
 # Entities
 
 class Sanction(Action):
-    def __init__(self, author: str, target: str) -> None:
+    def __init__(self, author: str | NSID, target: str | NSID) -> None:
         super().__init__(author, target)
 
         self.details: str = ""
@@ -20,7 +23,7 @@ class Sanction(Action):
         self.duration: int = 0 # Durée en secondes, 0 = définitif
 
 class AdminAction(Action):
-    def __init__(self, author: str, target: str) -> None:
+    def __init__(self, author: str | NSID, target: str | NSID) -> None:
         super().__init__(author, target)
 
         self.details: str = ""
@@ -30,7 +33,7 @@ class AdminAction(Action):
 # Community
 
 class Election(Action):
-    def __init__(self, author: str, target: str, position: str) -> None:
+    def __init__(self, author: str | NSID, target: str | NSID, position: str) -> None:
         super().__init__(author, target)
 
         self.position: str = position
@@ -38,13 +41,13 @@ class Election(Action):
         self.total_votes: int = 0
 
 class Promotion(Action):
-    def __init__(self, author: str, target: str, position: str) -> None:
+    def __init__(self, author: str | NSID, target: str | NSID, position: str) -> None:
         super().__init__(author, target)
 
         self.position: str = position
 
 class Demotion(Action):
-    def __init__(self, author: str, target: str) -> None:
+    def __init__(self, author: str | NSID, target: str | NSID) -> None:
         super().__init__(author, target)
 
         self.reason: str = None
@@ -53,7 +56,7 @@ class Demotion(Action):
 # Bank
 
 class Transaction(Action):
-    def __init__(self, author: str, target: str, amount: int) -> None:
+    def __init__(self, author: str | NSID, target: str | NSID, amount: int) -> None:
         super().__init__(author, target)
 
         self.amount: int = amount
@@ -61,7 +64,7 @@ class Transaction(Action):
         self.reason: str = None
 
 class Sale(Action):
-    def __init__(self, author: str = '0', target: str = '0') -> None:
+    def __init__(self, author: str | NSID = '0', target: str | NSID = '0') -> None:
         super().__init__(author, target)
 
         self.price: int = 0

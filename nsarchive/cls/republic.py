@@ -3,8 +3,8 @@ from .entities import *
 # Votes
 
 class Vote:
-    def __init__(self, id: str, title: str, choices: tuple[str]) -> None:
-        self.id: str = id
+    def __init__(self, id: str | NSID, title: str, choices: tuple[str]) -> None:
+        self.id: NSID = NSID(id)
         self.title: str = title
         self.choices = { choice : 0 for choice in choices }
         self.author: str = '0'
@@ -12,7 +12,7 @@ class Vote:
         self.endDate: int = 0
 
 class ClosedVote(Vote):
-    def __init__(self, id: str, title: str) -> None:
+    def __init__(self, id: str | NSID, title: str) -> None:
         super().__init__(id, title, ('yes', 'no', 'blank'))
 
 

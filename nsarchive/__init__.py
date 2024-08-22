@@ -55,7 +55,10 @@ class EntityInstance:
                 member = GroupMember(_member['id'])
                 member.permissions.__dict__ = _member['permissions']
 
-            entity.avatar = self.avatars.get(id).read()
+            try:
+                entity.avatar = self.avatars.get(id).read()
+            except: 
+                entity.avatar = self.avatars.get('0').read()
 
             entity.certifications = _data['certifications']
         else:

@@ -20,6 +20,7 @@ class PositionPermissions:
         self.edit_laws = False # Proposer une modification des différents textes de loi
         self.manage_entities = False # Gérer les membres et les organisations
         self.manage_national_channel = False # Prendre la parole sur la chaîne nationale et avoir une priorité de passage sur les autres chaînes
+        self.manage_reports = False # Accepter ou refuser une plainte
         self.manage_state_budgets = False # Gérer les différents budgets de l'État
         self.moderate_members = False # Envoyer des membres en garde à vue, en détention ou toute autre sanction non présente sur le client Discord
         self.propose_new_laws = self.edit_constitution # Proposer un nouveau texte de loi pris en charge par la Constitution

@@ -223,6 +223,8 @@ class EntityInstance:
             _data['type'] = "sanction"
         elif type(archive) == AdminAction:
             _data['type'] = "adminaction"
+        elif type(archive) == Report:
+            _data['type'] = "report"
         else:
             _data['type'] = "unknown"
         
@@ -257,9 +259,13 @@ class EntityInstance:
 
             archive.details = _data['details']
             archive.new_state = _data['new_state']
+        elif _data['type'] == "report": # Plainte
+            archive = Report(_data['author'], _data['target'])
+
+            archive.details = _data['details']
         else:
             archive = Action(_data['author'], _data['target'])
-        
+
         archive.id = id
         archive.action = _data['action']
         archive.date = _data['date']
@@ -279,7 +285,7 @@ class EntityInstance:
         """
 
         _res = self.archives.fetch(query).items
-        
+
         return [ self._get_archive(archive['key']) for archive in _res ]
 
 class RepublicInstance:
@@ -301,7 +307,7 @@ class RepublicInstance:
         self.mandate = self.db.Base('mandate')
         self.functions = self.db.Base('functions') # Liste des fonctionnaires
 
-    def get_vote(self, id: str | NSID) -> Vote | ClosedVote:
+    def get_vote(self, id: str | NSID) -> Vote | ClosedVote | Lawsuit:
         """
         Récupère un vote spécifique.
 
@@ -323,6 +329,8 @@ class RepublicInstance:
             vote = Vote(id, _data['title'], tuple(_data['choices'].keys()))
         elif _data['_type'] == 'closed':
             vote = ClosedVote(id, _data['title'])
+        elif _data['_type'] == 'lawsuit':
+            vote = Lawsuit(id, _data['title'])
         else:
             vote = Vote('0', 'Unknown Vote', ())
 
@@ -339,7 +347,10 @@ class RepublicInstance:
         vote.id = NSID(vote.id)
 
         _data = {
-            '_type': 'open' if type(vote) == Vote else 'closed' if type(vote) == ClosedVote else 'unknown',
+            '_type':'open' if type(vote) == Vote else\
+                    'closed' if type(vote) == ClosedVote else\
+                    'lawsuit' if type(vote) == Lawsuit else\
+                    'unknown',
             'title': vote.title,
             'author': NSID(vote.author),
             'startDate': vote.startDate,

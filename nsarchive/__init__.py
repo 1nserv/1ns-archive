@@ -121,7 +121,12 @@ class EntityInstance:
             _data['xp'] = entity.xp
             _data['boosts'] = entity.boosts
 
-        _base.put(_data, entity.id, expire_in = 3 * 31536000) # Données supprimées tous les trois ans
+            _votes = []
+            for vote in entity.votes:
+                _votes.append(NSID(vote))
+
+        self.electors.put(_votes, entity.id, expire_in = 112 * 84600) # Données supprimées après 16 semaines d'inactivité
+        _base.put(_data, entity.id, expire_in = 3 * 31536000) # Pareil après 3 ans
 
     def delete_entity(self, entity: Entity) -> None:
         """

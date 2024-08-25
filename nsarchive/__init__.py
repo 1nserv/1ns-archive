@@ -223,6 +223,8 @@ class EntityInstance:
             _data['type'] = "sanction"
         elif type(archive) == AdminAction:
             _data['type'] = "adminaction"
+        elif type(archive) == Report:
+            _data['type'] = "report"
         else:
             _data['type'] = "unknown"
         
@@ -257,6 +259,10 @@ class EntityInstance:
 
             archive.details = _data['details']
             archive.new_state = _data['new_state']
+        elif _data['type'] == "report": # Plainte
+            archive = Report(_data['author'], _data['target'])
+
+            archive.details = _data['details']
         else:
             archive = Action(_data['author'], _data['target'])
         

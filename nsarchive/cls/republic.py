@@ -1,3 +1,4 @@
+from nsarchive.cls.entities import NSID
 from .entities import *
 
 # Votes
@@ -11,9 +12,13 @@ class Vote:
         self.startDate: int = 0
         self.endDate: int = 0
 
-class ClosedVote(Vote):
+class ClosedVote(Vote): # Meilleur nom pour cette classe en v2
     def __init__(self, id: str | NSID, title: str) -> None:
         super().__init__(id, title, ('yes', 'no', 'blank'))
+
+class Lawsuit(Vote):
+    def __init__(self, id: str | NSID, title: str) -> None:
+        super().__init__(id, title, ('innocent', 'guilty', 'blank'))
 
 
 # Institutions (defs)

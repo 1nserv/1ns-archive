@@ -55,7 +55,11 @@ class EntityInstance:
 
             entity.xp = _data['xp']
             entity.boosts = _data['boosts']
-            entity.votes = [ NSID(vote) for vote in _votes['votes'] ]
+            
+            if _votes is None:
+                entity.votes = []
+            else:
+                entity.votes = [ NSID(vote) for vote in _votes['votes'] ]
         elif _data['_type'] == 'organization':
             entity = Organization(id)
 

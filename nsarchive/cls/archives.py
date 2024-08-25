@@ -29,6 +29,12 @@ class AdminAction(Action):
         self.details: str = ""
         self.new_state: str | int | bool = None
 
+class Report(Action):
+    def __init__(self, author: str | NSID, target: str | NSID) -> None:
+        super().__init__(author, target)
+
+        self.details: str = ""
+
 
 # Community
 

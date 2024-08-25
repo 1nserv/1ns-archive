@@ -179,6 +179,7 @@ class EntityInstance:
 
         id = NSID(id)
         groups = self.fetch_entities({'_type': 'organization'}, {'members': id})
+        groups.extend(self.fetch_entities({'_type': 'organization', 'owner_id': id}))
         
         return groups
 

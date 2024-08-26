@@ -21,6 +21,7 @@ class EntityInstance:
     - Position légale et permissions d'une entité: `.Position.Permissions`
     - Sanctions et modifications d'une entité: `.Action[ .AdminAction | .Sanction ]`
     """
+
     def __init__(self, token: str) -> None:
         self.db = deta.Deta(token)
         self.base = self.db.Base('entities')
@@ -48,7 +49,7 @@ class EntityInstance:
         _votes = self.electors.get(id)
 
         if _data is None:
-            return Entity("0")
+            return None
 
         if _data['_type'] == 'user':
             entity = User(id)
@@ -155,6 +156,7 @@ class EntityInstance:
         ## Renvoie
         - `list[Entity | User | Organization]`
         """
+
         _res = self.base.fetch(query).items
 
         if listquery is not None:
@@ -198,7 +200,7 @@ class EntityInstance:
         _data = self.positions.get(id)
 
         if _data is None:
-            raise RessourceNotFoundError(f"No position with ID {id}")
+            return None
 
         position = Position(id)
         position.name = _data['name']
@@ -323,7 +325,7 @@ class RepublicInstance:
         _data = self.votes.get(id)
 
         if _data is None:
-            raise RessourceNotFoundError(f"The vote #{id} does not exist.")
+            return None
 
         if _data['_type'] == 'open':
             vote = Vote(id, _data['title'], tuple(_data['choices'].keys()))

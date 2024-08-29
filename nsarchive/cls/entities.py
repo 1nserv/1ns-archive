@@ -138,11 +138,15 @@ class Organization(Entity):
         self.certifications[certif] = round(time.time())
 
     def add_member(self, member: GroupMember) -> None:
+        if not isinstance(member, GroupMember):
+            raise TypeError("Le membre doit être de type GroupMember")
+        
         self.members.append(member)
 
     def remove_member(self, member: GroupMember) -> None:
-        if member in self.members:
-            self.members.remove(member)
+        for _member in self.members:
+            if _member.id == member.id:
+                self.members.remove(_member)
 
     def set_owner(self, member: User) -> None:
         self.owner = member

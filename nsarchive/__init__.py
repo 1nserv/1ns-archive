@@ -177,7 +177,7 @@ class EntityInstance:
         if listquery:
             print("\033[1;33mAvertissement\033[0m Listquery n'est plus pris en charge et sera retiré en version 1.3.0")
 
-        return [ self.get_entity(NSID(entity['key'])) for entity in _res ]
+        return [ self.get_entity(NSID(entity['key'])) for entity in _res if entity is not None ]
 
     def get_entity_groups(self, id: str | NSID) -> list[Organization]:
         """

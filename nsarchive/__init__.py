@@ -129,7 +129,7 @@ class EntityInstance:
                     'permissions': member.permissions.__dict__.copy()
                 }
 
-                _data['members'] += _member                
+                _data['members'] += [_member]                
 
             self.avatars.put(name = entity.id, data = entity.avatar)
         elif type(entity) == User:

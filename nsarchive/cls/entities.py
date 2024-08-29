@@ -99,11 +99,12 @@ class MemberPermissions:
         for perm in permissions.values():
             self.__setattr__(*perm)
 
-class GroupMember():
+class GroupMember(User):
     def __init__(self, id: str | NSID) -> None:
-        self.id: NSID = NSID(id)
-        self.permissions: MemberPermissions = MemberPermissions()
-        self.position: str = 'membre'
+        super().__init__(id)
+
+        self.group_permissions: MemberPermissions = MemberPermissions()
+        self.group_position: str = 'membre'
 
 class Official:
     def __init__(self, id: str | NSID) -> None:

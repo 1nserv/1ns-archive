@@ -140,13 +140,19 @@ class Organization(Entity):
     def add_member(self, member: GroupMember) -> None:
         if not isinstance(member, GroupMember):
             raise TypeError("Le membre doit être de type GroupMember")
-        
+
         self.members.append(member)
 
     def remove_member(self, member: GroupMember) -> None:
         for _member in self.members:
             if _member.id == member.id:
                 self.members.remove(_member)
+
+    def append(self, member: GroupMember) -> None:
+        self.add_member(member)
+
+    def remove(self, member: GroupMember) -> None:
+        self.remove_member(member)
 
     def set_owner(self, member: User) -> None:
         self.owner = member

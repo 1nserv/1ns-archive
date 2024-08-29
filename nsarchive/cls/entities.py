@@ -38,6 +38,7 @@ class Position:
         self.name: str = "Inconnue"
         self.id = id
         self.permissions: PositionPermissions = PositionPermissions()
+
 class Entity:
     def __init__(self, id: str | NSID) -> None:
         self.id: NSID = NSID(id) # ID hexadécimal de l'entité (ou nom dans le cas de l'entreprise)

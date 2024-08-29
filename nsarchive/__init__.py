@@ -65,14 +65,14 @@ class EntityInstance:
             entity = Organization(id)
 
             entity.owner = self.get_entity(NSID(_data['owner_id']))
-            
+
             for _member in _data['members']:
                 member = GroupMember(_member['id'])
                 member.permissions.__dict__ = _member['permissions']
 
             try:
                 entity.avatar = self.avatars.get(id).read()
-            except: 
+            except:
                 entity.avatar = None
 
             entity.certifications = _data['certifications']
@@ -126,7 +126,8 @@ class EntityInstance:
             for vote in entity.votes:
                 _votes.append(NSID(vote))
 
-        self.electors.put({ "votes": _votes }, entity.id, expire_in = 112 * 84600) # Données supprimées après 16 semaines d'inactivité
+            self.electors.put({ "votes": _votes }, entity.id, expire_in = 112 * 84600) # Données supprimées après 16 semaines d'inactivité
+
         _base.put(_data, entity.id, expire_in = 3 * 31536000) # Pareil après 3 ans
 
     def delete_entity(self, entity: Entity) -> None:
@@ -183,7 +184,7 @@ class EntityInstance:
         groups = self.fetch_entities({'_type': 'organization'}, {'members': id})
         groups.extend(self.fetch_entities({'_type': 'organization', 'owner_id': id}))
         
-        return groups
+        return [ group for group in groups if group is not None ]
 
     def get_position(self, id: str) -> Position:
         """

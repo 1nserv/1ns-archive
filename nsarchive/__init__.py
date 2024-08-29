@@ -126,7 +126,7 @@ class EntityInstance:
             for member in entity.members:
                 _member = {
                     'id': NSID(member.id),
-                    'permissions': member.permissions.__dict__.copy()
+                    'permissions': member.group_permissions.__dict__.copy()
                 }
 
                 _data['members'] += [_member]                

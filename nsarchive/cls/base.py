@@ -18,7 +18,7 @@ class NSID(str):
         elif type(value) in (str, NSID):
             value = hex(int(value, 16))
         else:
-            return TypeError(f"<{value}> is not NSID serializable")
+            raise TypeError(f"<{value}> is not NSID serializable")
         
         if value.startswith("0x"):
             value = value[2:]

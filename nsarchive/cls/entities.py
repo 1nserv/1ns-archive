@@ -99,11 +99,12 @@ class MemberPermissions:
         for perm in permissions.values():
             self.__setattr__(*perm)
 
-class GroupMember():
+class GroupMember(User):
     def __init__(self, id: str | NSID) -> None:
-        self.id: NSID = NSID(id)
-        self.permissions: MemberPermissions = MemberPermissions()
-        self.position: str = 'membre'
+        super().__init__(id)
+
+        self.group_permissions: MemberPermissions = MemberPermissions()
+        self.group_position: str = 'membre'
 
 class Official:
     def __init__(self, id: str | NSID) -> None:
@@ -137,11 +138,15 @@ class Organization(Entity):
         self.certifications[certif] = round(time.time())
 
     def add_member(self, member: GroupMember) -> None:
+        if not isinstance(member, GroupMember):
+            raise TypeError("Le membre doit être de type GroupMember")
+        
         self.members.append(member)
 
     def remove_member(self, member: GroupMember) -> None:
-        if member in self.members:
-            self.members.remove(member)
+        for _member in self.members:
+            if _member.id == member.id:
+                self.members.remove(_member)
 
     def set_owner(self, member: User) -> None:
         self.owner = member

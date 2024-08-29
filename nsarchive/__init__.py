@@ -56,7 +56,7 @@ class EntityInstance:
 
             entity.xp = _data['xp']
             entity.boosts = _data['boosts']
-            
+
             if _votes is None:
                 entity.votes = []
             else:
@@ -68,7 +68,21 @@ class EntityInstance:
 
             for _member in _data['members']:
                 member = GroupMember(_member['id'])
-                member.permissions.__dict__ = _member['permissions']
+                member.group_permissions.__dict__ = _member['permissions']
+
+                _member_profile = self.get_entity(member.id)
+
+                member.set_name(_member_profile.name)
+                member.legalPosition = _member_profile.legalPosition
+                member.registerDate = _member_profile.registerDate
+
+                member.xp = _member_profile.xp
+                member.boosts = _member_profile.boosts
+
+                member.permissions = _member_profile.permissions
+                member.votes = _member_profile.votes
+
+                entity.append(member)
 
             try:
                 entity.avatar = self.avatars.get(id).read()

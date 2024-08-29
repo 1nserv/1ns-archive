@@ -166,7 +166,7 @@ class EntityInstance:
         query: `dict`
             La requête pour filtrer les entités.
         listquery: `dict | None`
-            Requête secondaire pour n'afficher que les listes contenant un certain élément.
+            OBSOLÈTE
 
         ## Renvoie
         - `list[Entity | User | Organization]`
@@ -174,11 +174,8 @@ class EntityInstance:
 
         _res = self.base.fetch(query).items
 
-        if listquery is not None:
-            for item in _res:
-                for target, value in listquery.items():
-                    if value not in item[target]:
-                        _res.remove(item)
+        if listquery:
+            print("\033[1;33mAvertissement\033[0m Listquery n'est plus pris en charge et sera retiré en version 1.3.0")
 
         return [ self.get_entity(NSID(entity['key'])) for entity in _res ]
 
@@ -195,9 +192,16 @@ class EntityInstance:
         """
 
         id = NSID(id)
-        groups = self.fetch_entities({'_type': 'organization'}, {'members': id})
+        groups = self.fetch_entities({'_type': 'organization'})
         groups.extend(self.fetch_entities({'_type': 'organization', 'owner_id': id}))
-        
+
+        for group in groups:
+            for member in group.members:
+                if member.id == id:
+                    break
+            else:
+                groups.remove(group)
+
         return [ group for group in groups if group is not None ]
 
     def get_position(self, id: str) -> Position:

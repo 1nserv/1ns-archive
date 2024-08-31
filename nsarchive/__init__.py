@@ -677,15 +677,14 @@ class BankInstance:
             ID de l'auteur de la vente
         """
 
-        sale = Sale(NSID(round(time.time())) * 16 ** 3)
-        sale.item = item.id
+        sale = Sale(NSID(round(time.time()) * 16 ** 3), item)
         sale.quantity = quantity
         sale.price = price
         sale.seller_id = seller
 
         _data = sale.__dict__.copy()
 
-        self.marketplace.put(key = item.id, data = _data)
+        self.marketplace.put(key = sale.id, data = _data)
 
     def delete_sale(self, sale: Sale) -> None:
         """Annule une vente sur le marketplace."""
@@ -735,7 +734,7 @@ class BankInstance:
             "objects": [ object.__dict__ for object in inventory.objects ]
         }
 
-        self.inventories.put(id = inventory.owner_id, data = _data)
+        self.inventories.put(key = inventory.owner_id, data = _data)
 
     def delete_inventory(self, inventory: Inventory) -> None:
         """
@@ -808,7 +807,7 @@ class BankInstance:
         ## Renvoie
         - `list[Action | Transaction]`
         """
-        
+
         _res = self.archives.fetch(query).items
 
         return [ self._get_archive(archive['key']) for archive in _res ]

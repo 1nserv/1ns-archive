@@ -34,8 +34,8 @@ class Inventory:
 
 class Sale:
     def __init__(self, id: NSID, item: Item) -> None:
-        self.id: NSID = id
-        self.item: NSID = item.id
+        self.id: NSID = NSID(id)
+        self.item: NSID = NSID(item.id)
         self.quantity: int = 1
 
         self.price: int = 0

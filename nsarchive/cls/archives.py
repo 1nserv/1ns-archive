@@ -68,9 +68,3 @@ class Transaction(Action):
         self.amount: int = amount
         self.currency: str = 'HC'
         self.reason: str = None
-
-class Sale(Action):
-    def __init__(self, author: str | NSID = '0', target: str | NSID = '0') -> None:
-        super().__init__(author, target)
-
-        self.price: int = 0

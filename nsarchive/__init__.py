@@ -760,8 +760,6 @@ class BankInstance:
         if type(archive) == Transaction:
             _data['type'] = "transaction"
             archive.currency = archive.currency.upper()
-        elif type(archive) == Sale:
-            _data['type'] = "sale"
         else:
             _data['type'] = "unknown"
 
@@ -790,10 +788,6 @@ class BankInstance:
 
             archive.reason = _data['reason']
             archive.currency = _data['currency']
-        elif _data['type'] == "sale":
-            archive = Sale(_data['author'], _data['target'])
-
-            archive.price = _data['price']
         else:
             archive = Action(_data['author'], _data['target'])
 

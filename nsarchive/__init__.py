@@ -683,6 +683,7 @@ class BankInstance:
         sale.seller_id = seller
 
         _data = sale.__dict__.copy()
+        del _data['id']
 
         self.marketplace.put(key = sale.id, data = _data)
 

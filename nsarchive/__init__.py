@@ -635,9 +635,9 @@ class BankInstance:
 
         self.save_account(account)
 
-    def get_sale(self, id: str | NSID) -> Item | None:
+    def get_sale(self, id: str | NSID) -> Sale | None:
         """
-        Récupère un item du marché.
+        Récupère une vente disponible sur le marketplace.
 
         ## Paramètres
         id: `str | NSID`
@@ -662,7 +662,19 @@ class BankInstance:
         return sale
 
     def sell_item(self, item: Item, quantity: int, price: int, seller: NSID) -> None:
-        """Sauvegarde un item dans la base de données du marché."""
+        """
+        Vend un item sur le marché.
+        
+        ## Paramètres
+        item: `.Item`
+            Item à vendre
+        quantity: `int`
+            Nombre d'items à vendre
+        price: `int`
+            Prix à l'unité de chaque objet
+        seller: `NSID`
+            ID de l'auteur de la vente
+        """
 
         sale = Sale(NSID(round(time.time())) * 16 ** 3)
         sale.item = item.id
@@ -674,11 +686,11 @@ class BankInstance:
 
         self.marketplace.put(key = item.id, data = _data)
 
-    def delete_item(self, item: Item) -> None:
-        """Supprime un item du marché."""
+    def delete_sale(self, sale: Sale) -> None:
+        """Annule une vente sur le marketplace."""
 
-        item.id = NSID(item.id)
-        self.marketplace.delete(item.id)
+        sale.id = NSID(sale.id)
+        self.marketplace.delete(sale.id)
 
     def _add_archive(self, archive: Action):
         """Ajoute une archive d'une transaction ou d'une vente dans la base de données."""

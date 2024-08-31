@@ -255,7 +255,7 @@ class EntityInstance:
             _data['type'] = "report"
         else:
             _data['type'] = "unknown"
-        
+
         self.archives.put(key = archive.id, data = _data)
 
     def _get_archive(self, id: str | NSID) -> Action | Sanction | AdminAction:
@@ -275,7 +275,7 @@ class EntityInstance:
 
         if _data is None:
             return None
-        
+
         if _data['type'] == "sanction": # Mute, ban, GAV, kick, détention, prune (xp seulement)
             archive = Sanction(_data['author'], _data['target'])
 
@@ -588,6 +588,7 @@ class BankInstance:
         self.accounts = self.db.Base('accounts')
         self.registry = self.db.Base('banks')
         self.marketplace = self.db.Base('shop')
+        self.inventories = self.db.Base('inventories')
 
     def get_account(self, id: str | NSID) -> BankAccount:
         """
@@ -635,9 +636,9 @@ class BankInstance:
 
         self.save_account(account)
 
-    def get_item(self, id: str | NSID) -> Item | None:
+    def get_sale(self, id: str | NSID) -> Sale | None:
         """
-        Récupère un item du marché.
+        Récupère une vente disponible sur le marketplace.
 
         ## Paramètres
         id: `str | NSID`
@@ -654,28 +655,98 @@ class BankInstance:
         if _data is None:
             return None
 
-        item = Item(id)
-        item.title = _data['title']
-        item.emoji = _data['emoji']
-        item.seller_id = _data['seller']
-        item.price = _data['price']
+        sale = Sale(NSID(id))
 
-        return item
+        del _data['key']
+        sale.__dict__ = _data
 
-    def save_item(self, item: Item) -> None:
-        """Sauvegarde un item dans la base de données du marché."""
+        return sale
 
-        item.id = NSID(item.id)
+    def sell_item(self, item: Item, quantity: int, price: int, seller: NSID) -> None:
+        """
+        Vend un item sur le marché.
+        
+        ## Paramètres
+        item: `.Item`
+            Item à vendre
+        quantity: `int`
+            Nombre d'items à vendre
+        price: `int`
+            Prix à l'unité de chaque objet
+        seller: `NSID`
+            ID de l'auteur de la vente
+        """
 
-        _data = item.__dict__.copy()
+        sale = Sale(NSID(round(time.time()) * 16 ** 3), item)
+        sale.quantity = quantity
+        sale.price = price
+        sale.seller_id = seller
 
-        self.marketplace.put(key = item.id, data = _data)
+        _data = sale.__dict__.copy()
+        del _data['id']
 
-    def delete_item(self, item: Item) -> None:
-        """Supprime un item du marché."""
+        self.marketplace.put(key = sale.id, data = _data)
 
-        item.id = NSID(item.id)
-        self.marketplace.delete(item.id)
+    def delete_sale(self, sale: Sale) -> None:
+        """Annule une vente sur le marketplace."""
+
+        sale.id = NSID(sale.id)
+        self.marketplace.delete(sale.id)
+
+    def get_inventory(self, id: NSID) -> Inventory | None:
+        """
+        Récupérer un inventaire dans la base des inventaires.
+
+        ## Paramètres
+        id: `NSID`
+            ID du propriétaire de l'inventaire
+
+        ## Retourne
+        - `.Inventory | None`
+        """
+        _data = self.inventories.get(id)
+
+        if _data is None:
+            return None
+
+        inventory = Inventory(id)
+
+        del _data['key']
+
+        for _item in _data['objects']:
+            item = Item(_item['id'])
+            item.__dict__ = _item
+
+            inventory.objects.append(item)
+
+        return inventory
+
+    def save_inventory(self, inventory: Inventory) -> None:
+        """
+        Sauvegarder un inventaire
+
+        ## Paramètres
+        inventory: `.Inventory`
+            Inventaire à sauvegarder
+        """
+
+        _data = {
+            "owner_id": inventory.owner_id,
+            "objects": [ object.__dict__ for object in inventory.objects ]
+        }
+
+        self.inventories.put(key = inventory.owner_id, data = _data)
+
+    def delete_inventory(self, inventory: Inventory) -> None:
+        """
+        Supprime un inventaire
+
+        ## Paramètres
+        inventory: `.Inventory`
+            Inventaire à supprimer
+        """
+
+        self.inventories.delete(inventory.id)
 
     def _add_archive(self, archive: Action):
         """Ajoute une archive d'une transaction ou d'une vente dans la base de données."""
@@ -689,8 +760,6 @@ class BankInstance:
         if type(archive) == Transaction:
             _data['type'] = "transaction"
             archive.currency = archive.currency.upper()
-        elif type(archive) == Sale:
-            _data['type'] = "sale"
         else:
             _data['type'] = "unknown"
 
@@ -719,10 +788,6 @@ class BankInstance:
 
             archive.reason = _data['reason']
             archive.currency = _data['currency']
-        elif _data['type'] == "sale":
-            archive = Sale(_data['author'], _data['target'])
-
-            archive.price = _data['price']
         else:
             archive = Action(_data['author'], _data['target'])
 
@@ -743,7 +808,7 @@ class BankInstance:
         ## Renvoie
         - `list[Action | Transaction]`
         """
-        
+
         _res = self.archives.fetch(query).items
 
         return [ self._get_archive(archive['key']) for archive in _res ]

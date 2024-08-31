@@ -1,3 +1,4 @@
+from nsarchive.cls.base import NSID
 from .base import *
 
 class BankAccount:
@@ -30,3 +31,12 @@ class Inventory:
 
         for i in range(quantity):
             self.objects.remove(item)
+
+class Sale:
+    def __init__(self, id: NSID, item: Item) -> None:
+        self.id: NSID = id
+        self.item: NSID = item.id
+        self.quantity: int = 1
+
+        self.price: int = 0
+        self.seller_id: NSID = NSID('0')

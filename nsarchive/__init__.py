@@ -255,7 +255,7 @@ class EntityInstance:
             _data['type'] = "report"
         else:
             _data['type'] = "unknown"
-        
+
         self.archives.put(key = archive.id, data = _data)
 
     def _get_archive(self, id: str | NSID) -> Action | Sanction | AdminAction:
@@ -275,7 +275,7 @@ class EntityInstance:
 
         if _data is None:
             return None
-        
+
         if _data['type'] == "sanction": # Mute, ban, GAV, kick, détention, prune (xp seulement)
             archive = Sanction(_data['author'], _data['target'])
 
@@ -635,7 +635,7 @@ class BankInstance:
 
         self.save_account(account)
 
-    def get_item(self, id: str | NSID) -> Item | None:
+    def get_sale(self, id: str | NSID) -> Item | None:
         """
         Récupère un item du marché.
 
@@ -654,20 +654,23 @@ class BankInstance:
         if _data is None:
             return None
 
-        item = Item(id)
-        item.title = _data['title']
-        item.emoji = _data['emoji']
-        item.seller_id = _data['seller']
-        item.price = _data['price']
+        sale = Sale(NSID(id))
 
-        return item
+        del _data['key']
+        sale.__dict__ = _data
 
-    def save_item(self, item: Item) -> None:
+        return sale
+
+    def sell_item(self, item: Item, quantity: int, price: int, seller: NSID) -> None:
         """Sauvegarde un item dans la base de données du marché."""
 
-        item.id = NSID(item.id)
+        sale = Sale(NSID(round(time.time())) * 16 ** 3)
+        sale.item = item.id
+        sale.quantity = quantity
+        sale.price = price
+        sale.seller_id = seller
 
-        _data = item.__dict__.copy()
+        _data = sale.__dict__.copy()
 
         self.marketplace.put(key = item.id, data = _data)
 

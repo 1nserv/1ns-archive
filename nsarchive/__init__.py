@@ -200,6 +200,9 @@ class EntityInstance:
                 groups.remove(group)
                 continue
 
+            if group.owner.id == id:
+                continue
+
             for member in group.members:
                 if member.id == id:
                     break

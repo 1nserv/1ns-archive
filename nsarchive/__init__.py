@@ -588,6 +588,7 @@ class BankInstance:
         self.accounts = self.db.Base('accounts')
         self.registry = self.db.Base('banks')
         self.marketplace = self.db.Base('shop')
+        self.inventories = self.db.Base('inventories')
 
     def get_account(self, id: str | NSID) -> BankAccount:
         """
@@ -691,6 +692,61 @@ class BankInstance:
 
         sale.id = NSID(sale.id)
         self.marketplace.delete(sale.id)
+
+    def get_inventory(self, id: NSID) -> Inventory | None:
+        """
+        Récupérer un inventaire dans la base des inventaires.
+
+        ## Paramètres
+        id: `NSID`
+            ID du propriétaire de l'inventaire
+
+        ## Retourne
+        - `.Inventory | None`
+        """
+        _data = self.inventories.get(id)
+
+        if _data is None:
+            return None
+
+        inventory = Inventory(id)
+
+        del _data['key']
+
+        for _item in _data['objects']:
+            item = Item(_item['id'])
+            item.__dict__ = _item
+
+            inventory.objects.append(item)
+
+        return inventory
+
+    def save_inventory(self, inventory: Inventory) -> None:
+        """
+        Sauvegarder un inventaire
+
+        ## Paramètres
+        inventory: `.Inventory`
+            Inventaire à sauvegarder
+        """
+
+        _data = {
+            "owner_id": inventory.owner_id,
+            "objects": [ object.__dict__ for object in inventory.objects ]
+        }
+
+        self.inventories.put(id = inventory.owner_id, data = _data)
+
+    def delete_inventory(self, inventory: Inventory) -> None:
+        """
+        Supprime un inventaire
+
+        ## Paramètres
+        inventory: `.Inventory`
+            Inventaire à supprimer
+        """
+
+        self.inventories.delete(inventory.id)
 
     def _add_archive(self, archive: Action):
         """Ajoute une archive d'une transaction ou d'une vente dans la base de données."""

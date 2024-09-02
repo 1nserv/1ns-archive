@@ -97,6 +97,12 @@ class EntityInstance:
         entity.legalPosition = _data['legalPosition'] # Métier si c'est un utilisateur, domaine professionnel si c'est un collectif
         entity.registerDate = _data['registerDate']
 
+        for  key, value in _data.get('additional', {}):
+            if isinstance(value, str) and value.startswith('\n'):
+                entity.add_link(key, int(value[1:]))
+            else:
+                entity.add_link(key, value)
+
         return entity
 
     def save_entity(self, entity: Entity) -> None:
@@ -115,8 +121,15 @@ class EntityInstance:
             '_type': 'user' if type(entity) == User else 'organization' if type(entity) == Organization else 'unknown',
             'name': entity.name,
             'legalPosition': entity.legalPosition,
-            'registerDate': entity.registerDate
+            'registerDate': entity.registerDate,
+            'additional': {}
         }
+
+        for key, value in entity.additional.items():
+            if isinstance(value, int) and len(str(int)) >= 15:
+                _data['additional'][key] = '\n' + str(value)
+            elif type(value) in (str, int):
+                _data['additional'][key] = value
 
         if type(entity) == Organization:
             _data['owner_id'] = NSID(entity.owner.id) if entity.owner else NSID("0")

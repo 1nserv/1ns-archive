@@ -45,6 +45,7 @@ class Entity:
         self.name: str = "Entité Inconnue"
         self.registerDate: int = 0
         self.legalPosition: Position = Position()
+        self.additional: dict = {}
 
     def set_name(self, new_name: str) -> None:
         if len(new_name) > 32:
@@ -54,6 +55,13 @@ class Entity:
 
     def set_position(self, position: str) -> None:
         self.legalPosition = position
+
+    def add_link(self, key: str, value: str | int) -> None:
+        if isinstance(value, str) or isinstance(value, int):
+            self.additional[key] = value
+    
+    def unlink(self, key: str) -> None:
+        del self.additional[key]
 
 class User(Entity):
     def __init__(self, id: str | NSID) -> None:

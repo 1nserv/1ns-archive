@@ -96,6 +96,7 @@ class EntityInstance:
         entity.name = _data['name']
         entity.legalPosition = _data['legalPosition'] # Métier si c'est un utilisateur, domaine professionnel si c'est un collectif
         entity.registerDate = _data['registerDate']
+        entity.additional = _data.get('additional', {})
 
         return entity
 
@@ -115,7 +116,8 @@ class EntityInstance:
             '_type': 'user' if type(entity) == User else 'organization' if type(entity) == Organization else 'unknown',
             'name': entity.name,
             'legalPosition': entity.legalPosition,
-            'registerDate': entity.registerDate
+            'registerDate': entity.registerDate,
+            'additional': entity.additional
         }
 
         if type(entity) == Organization:

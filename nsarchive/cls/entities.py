@@ -59,7 +59,7 @@ class Entity:
     def add_link(self, key: str, value: str | int) -> None:
         if isinstance(value, str) or isinstance(value, int):
             self.additional[key] = value
-    
+
     def unlink(self, key: str) -> None:
         del self.additional[key]
 
@@ -142,8 +142,14 @@ class Organization(Entity):
         self.members: list[GroupMember] = []
         self.avatar: bytes = assets.open('default_avatar.png')
 
-    def add_certification(self, certif: str) -> None:
-        self.certifications[certif] = round(time.time())
+    def add_certification(self, certification: str) -> None:
+        self.certifications[certification] = round(time.time())
+
+    def has_certification(self, certification: str) -> bool:
+        return certification in self.certifications.keys()
+
+    def remove_certification(self, certification: str) -> None:
+        del self.certifications[certification]
 
     def add_member(self, member: GroupMember) -> None:
         if not isinstance(member, GroupMember):

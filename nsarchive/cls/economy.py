@@ -1,12 +1,11 @@
-from nsarchive.cls.base import NSID
-from .base import *
+from .base import NSID
 
 class BankAccount:
     def __init__(self, id: str | NSID) -> None:
         self.id: NSID = NSID(id)
         self.owner: NSID = NSID(0)
         self.amount: int = 0
-        self.locked: bool = False
+        self.frozen: bool = False
         self.bank: str = "HexaBank"
 
         self.income: int = 0
@@ -23,7 +22,7 @@ class Inventory:
         self.objects: list[Item] = []
 
     def append(self, item: Item, quantity: int = 1):
-        self.objects.extend(quantity * [item])
+        self.objects.extend(quantity * [ item ])
 
     def throw(self, item: Item, quantity: int = 1):
         if quantity > self.objects.count(item):

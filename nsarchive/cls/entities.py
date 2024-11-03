@@ -1,8 +1,7 @@
-import io
 import time
 
 from .exceptions import *
-from .base import *
+from .base import NSID
 
 from ..utils import assets
 
@@ -99,9 +98,10 @@ class MemberPermissions:
     """
 
     def __init__(self) -> None:
-        self.manage_organization = False # Renommer ou changer le logo
-        self.manage_members = False # Virer quelqu'un d'une entreprise, l'y inviter, changer ses rôles
-        self.manage_roles = False # Promouvoir ou rétrograder les membres
+        self.manage_organization = False # Renommer l'organisation, changer le logo
+        self.manage_roles = False # Changer les rôles des membres
+        self.manage_shares = False # Revaloriser les actions
+        self.manage_members = False # Virer quelqu'un d'une entreprise, l'y inviter
 
     def edit(self, **permissions: bool) -> None:
         for perm in permissions.values():
@@ -111,36 +111,38 @@ class GroupMember(User):
     def __init__(self, id: str | NSID) -> None:
         super().__init__(id)
 
-        self.group_permissions: MemberPermissions = MemberPermissions()
-        self.group_position: str = 'membre'
+        self.permission_level: int = 0
 
-class Official:
-    def __init__(self, id: str | NSID) -> None:
-        self.id: NSID = NSID(id)
+    def group_permissions(self) -> MemberPermissions:
+        p = MemberPermissions()
 
-        self.mandates: int = {
-            'PRE_REP': 0, # Président de la République
-            'MIN': 0, # Différents ministres
-            'PRE_AS': 0, # Président de l'Assemblée Nationale
-            'JUDGE': 0, # Juge
-            'REPR': 0 # Député
-        }
+        if self.permission_level >= 1:
+            p.manage_members = True
 
-        self.contributions: dict = {
-            'project': 0,
-            'approved_project': 0, 
-            'admin_action': 0, 
-            'law_vote': 0
-        }
+        if self.permission_level >= 2:
+            p.manage_shares = True
+
+        if self.permission_level >= 3:
+            p.manage_roles = True
+
+        if self.permission_level >= 4:
+            p.manage_organization = True
+
+        return p
 
 class Organization(Entity):
     def __init__(self, id: str | NSID) -> None:
         super().__init__(NSID(id))
 
         self.owner: Entity
+        self.avatar: bytes = assets.open('default_avatar.png')
+
         self.certifications: dict = {}
         self.members: list[GroupMember] = []
-        self.avatar: bytes = assets.open('default_avatar.png')
+
+        self.parts: dict[NSID, int] = {
+            self.owner.id: 1
+        }
 
     def add_certification(self, certification: str) -> None:
         self.certifications[certification] = round(time.time())

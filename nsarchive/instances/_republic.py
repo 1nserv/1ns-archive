@@ -103,9 +103,9 @@ class RepublicInstance(Instance):
 
         base = 'mandate' if current_mandate else 'archives'
 
-        _contributions = self.fetch(base, {'author': id, 'type': 'contrib'})
-        _mandates = self.fetch(base, {'target': id, 'type': 'election'}) +\
-                    self.fetch(base, {'target': id, 'type': 'promotion'})
+        _contributions = self.fetch(base, {'author': id, '_type': 'contrib'})
+        _mandates = self.fetch(base, {'target': id, '_type': 'election'}) +\
+                    self.fetch(base, {'target': id, '_type': 'promotion'})
 
         user = Official(id)
         for mandate in _mandates:
@@ -209,25 +209,25 @@ class RepublicInstance(Instance):
     ---- ARCHIVES ----
     """
 
-    def _add_archive(self, archive: Action) -> None:
+    def _add_archive(self, archive: Archive) -> None:
         """Ajoute une archive d'une action (élection, promotion, ou rétrogradation) dans la base de données."""
 
         archive.id = NSID(archive.id)
         _data = archive.__dict__.copy()
 
         if type(archive) == Election:
-            _data['type'] = "election"
+            _data['_type'] = "election"
         elif type(archive) == Promotion:
-            _data['type'] = "promotion"
+            _data['_type'] = "promotion"
         elif type(archive) == Demotion:
-            _data['type'] = "demotion"
+            _data['_type'] = "demotion"
         else:
-            _data['type'] = "unknown"
+            _data['_type'] = "unknown"
 
         self._put_in_db('archives', _data)
         self._put_in_db('mandate', _data) # Ajouter les archives à celle du mandat actuel
 
-    def _get_archive(self, id: str | NSID) -> Action | Election | Promotion | Demotion:
+    def _get_archive(self, id: str | NSID) -> Archive | Election | Promotion | Demotion:
         """
         Récupère une archive spécifique.
 
@@ -236,7 +236,7 @@ class RepublicInstance(Instance):
             ID de l'archive.
 
         ## Renvoie
-        - `.Action | .Election | .Promotion | .Demotion`
+        - `.Archive | .Election | .Promotion | .Demotion`
         """
 
         id = NSID(id)
@@ -245,27 +245,23 @@ class RepublicInstance(Instance):
         if _data is None:
             return None
 
-        if _data['type'] == "election":
+        if _data['_type'] == "election":
             archive = Election(_data['author'], _data['target'], _data['position'])
-
-            archive.positive_votes = _data['positive_votes']
-            archive.total_votes = _data['total_votes']
-        elif _data['type'] == "promotion":
+        elif _data['_type'] == "promotion":
             archive = Promotion(_data['author'], _data['target'], _data['position'])
-        elif _data['type'] == "demotion":
+        elif _data['_type'] == "demotion":
             archive = Demotion(_data['author'], _data['target'])
-
-            archive.reason = _data['reason']
         else:
-            archive = Action(_data['author'], _data['target'])
+            archive = Archive(_data['author'], _data['target'])
 
         archive.id = id
         archive.action = _data['action']
         archive.date = _data['date']
+        archive.details = _data['details']
 
         return archive
 
-    def _fetch_archives(self, **query) -> list[ Action | Election | Promotion | Demotion ]:
+    def _fetch_archives(self, **query) -> list[ Archive | Election | Promotion | Demotion ]:
         """
         Récupère une liste d'archives correspondant à la requête.
 
@@ -274,9 +270,9 @@ class RepublicInstance(Instance):
             Requête pour filtrer les archives.
 
         ## Renvoie
-        - `list[Action | Election | Promotion | Demotion]`
+        - `list[.Archive | .Election | .Promotion | .Demotion]`
         """
 
         _res = self.fetch('archives', **query)
         
-        return [ self._get_archive(archive['key']) for archive in _res ]
+        return [ self._get_archive(archive['id']) for archive in _res ]

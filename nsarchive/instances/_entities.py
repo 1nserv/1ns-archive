@@ -155,7 +155,7 @@ class EntityInstance(Instance):
 
         self._delete_by_ID('individuals' if isinstance(entity, User) else 'organizations', NSID(entity.id))
 
-    def fetch_entities(self, query: dict = None) -> list[ Entity | User | Organization ]:
+    def fetch_entities(self, **query: dict) -> list[ Entity | User | Organization ]:
         """
         Récupère une liste d'entités en fonction d'une requête.
 
@@ -184,8 +184,8 @@ class EntityInstance(Instance):
         """
 
         id = NSID(id)
-        groups = self.fetch_entities({'_type': 'organization'})
-        groups.extend(self.fetch_entities({'_type': 'organization', 'owner_id': id}))
+        groups = self.fetch_entities(_type = 'organization')
+        groups.extend(self.fetch_entities(_type = 'organization', owner_id = id))
 
         for group in groups:
             if group is None:
@@ -230,7 +230,7 @@ class EntityInstance(Instance):
     ---- ARCHIVES --
     """
 
-    def _add_archive(self, archive: Action) -> None:
+    def _add_archive(self, archive: Archive) -> None:
         """
         Ajoute une archive d'une action (modification au sein d'un groupe ou sanction) dans la base de données.
         """
@@ -242,17 +242,15 @@ class EntityInstance(Instance):
         _data = archive.__dict__.copy()
 
         if type(archive) == Sanction:
-            _data['type'] = "sanction"
-        elif type(archive) == AdminAction:
-            _data['type'] = "adminaction"
+            _data['_type'] = "sanction"
         elif type(archive) == Report:
-            _data['type'] = "report"
+            _data['_type'] = "report"
         else:
-            _data['type'] = "unknown"
+            _data['_type'] = "unknown"
 
         self._put_in_db('archives', _data)
 
-    def _get_archive(self, id: str | NSID) -> Action | Sanction | AdminAction:
+    def _get_archive(self, id: str | NSID) -> Archive | Sanction:
         """
         Récupère une archive spécifique.
 
@@ -261,7 +259,7 @@ class EntityInstance(Instance):
             ID de l'archive.
 
         ## Renvoie
-        - `.Action | .Sanction | .AdminAction`
+        - `.Archive | .Sanction `
         """
 
         id = NSID(id)
@@ -270,31 +268,21 @@ class EntityInstance(Instance):
         if _data is None:
             return None
 
-        if _data['type'] == "sanction": # Mute, ban, GAV, kick, détention, prune (xp seulement)
+        if _data['_type'] == "sanction": # Mute, ban, GAV, kick, détention, prune (xp seulement)
             archive = Sanction(_data['author'], _data['target'])
-
-            archive.details = _data['details']
-            archive.major = _data['major']
-            archive.duration = _data['duration']
-        elif _data['type'] == "adminaction": # Renommage, promotion, démotion (au niveau de l'état)
-            archive = AdminAction(_data['author'], _data['target'])
-
-            archive.details = _data['details']
-            archive.new_state = _data['new_state']
-        elif _data['type'] == "report": # Plainte
+        elif _data['_type'] == "report": # Plainte
             archive = Report(_data['author'], _data['target'])
-
-            archive.details = _data['details']
         else:
-            archive = Action(_data['author'], _data['target'])
+            archive = Archive(_data['author'], _data['target'])
 
         archive.id = id
-        archive.action = _data['action']
         archive.date = _data['date']
+        archive.action = _data['action']
+        archive.details = _data['details']
 
         return archive
 
-    def _fetch_archives(self, **query) -> list[ Action | Sanction | AdminAction ]:
+    def _fetch_archives(self, **query) -> list[ Archive | Sanction ]:
         """
         Récupère une liste d'archives correspondant à la requête.
 
@@ -303,9 +291,9 @@ class EntityInstance(Instance):
             Requête pour filtrer les archives.
 
         ## Renvoie
-        - `list[Action | Sanction | AdminAction]`
+        - `list[.Archive | .Sanction]`
         """
 
         _res = self.fetch('archives', **query)
 
-        return [ self._get_archive(archive['key']) for archive in _res ]
+        return [ self._get_archive(archive['id']) for archive in _res ]

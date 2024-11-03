@@ -1,14 +1,14 @@
 [tool.poetry]
 name = "nsarchive"
-version = "1.4.0"
-description = ""
+version = "2.0.0-alpha.1"
+description = "API-wrapper pour récupérer des données liées à Nation"
 authors = ["happex <110610727+okayhappex@users.noreply.github.com>"]
 license = "GPL-3.0"
 readme = "README.md"
 
 [tool.poetry.dependencies]
 python = "^3.10"
-deta = "^1.2"
+supabase = "^2.9.1"
 pillow = "^10.4"
 
 [build-system]

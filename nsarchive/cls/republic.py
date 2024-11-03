@@ -1,5 +1,4 @@
-from nsarchive.cls.entities import NSID
-from .entities import *
+from nsarchive.cls.base import NSID
 
 # Votes
 
@@ -23,6 +22,25 @@ class Lawsuit(Vote):
 
 # Institutions (defs)
 
+class Official:
+    def __init__(self, id: str | NSID) -> None:
+        self.id: NSID = NSID(id)
+
+        self.mandates: int = {
+            'PRE_REP': 0, # Président de la République
+            'MIN': 0, # Différents ministres
+            'PRE_AS': 0, # Président de l'Assemblée Nationale
+            'JUDGE': 0, # Juge
+            'REPR': 0 # Député
+        }
+
+        self.contributions: dict = {
+            'project': 0,
+            'approved_project': 0, 
+            'admin_action': 0, 
+            'law_vote': 0
+        }
+
 class Administration:
     def __init__(self) -> None:
         self.president: Official
@@ -39,15 +57,15 @@ class Government:
         self.press_minister: Official
         self.outer_minister: Official
 
-class Assembly:
-    def __init__(self) -> None:
-        self.president: Official
-        self.members: list[Official]
-
 class Court:
     def __init__(self) -> None:
         self.president: Official
         # On discutera de la mise en place d'un potentiel président. Pour l'instant c'est le Ministre de la Justice
+        self.members: list[Official]
+
+class Assembly:
+    def __init__(self) -> None:
+        self.president: Official
         self.members: list[Official]
 
 class PoliceForces:
@@ -55,11 +73,10 @@ class PoliceForces:
         self.president: Official
         self.members: list[Official]
 
-class Institutions:
+class State:
     def __init__(self) -> None:
         self.administration: Administration
         self.government: Government
         self.court: Court
         self.assembly: Assembly
         self.police: PoliceForces
-

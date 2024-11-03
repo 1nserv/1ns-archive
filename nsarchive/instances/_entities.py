@@ -155,7 +155,7 @@ class EntityInstance(Instance):
 
         self._delete_by_ID('individuals' if isinstance(entity, User) else 'organizations', NSID(entity.id))
 
-    def fetch_entities(self, query: dict = None) -> list[ Entity | User | Organization ]:
+    def fetch_entities(self, **query: dict) -> list[ Entity | User | Organization ]:
         """
         Récupère une liste d'entités en fonction d'une requête.
 
@@ -184,8 +184,8 @@ class EntityInstance(Instance):
         """
 
         id = NSID(id)
-        groups = self.fetch_entities({'_type': 'organization'})
-        groups.extend(self.fetch_entities({'_type': 'organization', 'owner_id': id}))
+        groups = self.fetch_entities(_type = 'organization')
+        groups.extend(self.fetch_entities(_type = 'organization', owner_id = id))
 
         for group in groups:
             if group is None:

@@ -67,7 +67,7 @@ class EntityInstance(Instance):
 
             for _member in _data['members']:
                 member = GroupMember(_member['id'])
-                member.permission_level = _member['level']
+                member.permission_level = _member['position']
 
                 _member_profile = self.get_entity(member.id)
 

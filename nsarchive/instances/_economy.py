@@ -185,7 +185,7 @@ class EconomyInstance(Instance):
     ---- ARCHIVES ----
     """
 
-    def _add_archive(self, archive: Action):
+    def _add_archive(self, archive: Archive):
         """Ajoute une archive d'une transaction ou d'une vente dans la base de données."""
 
         archive.id = NSID(archive.id)
@@ -195,14 +195,13 @@ class EconomyInstance(Instance):
         _data = archive.__dict__.copy()
 
         if type(archive) == Transaction:
-            _data['type'] = "transaction"
-            archive.currency = archive.currency.upper()
+            _data['_type'] = "transaction"
         else:
-            _data['type'] = "unknown"
+            _data['_type'] = "unknown"
 
         self._put_in_db('archives', _data)
 
-    def _get_archive(self, id: str | NSID) -> Action | Transaction:
+    def _get_archive(self, id: str | NSID) -> Archive | Transaction:
         """
         Récupère une archive spécifique.
 
@@ -211,30 +210,28 @@ class EconomyInstance(Instance):
             ID de l'archive.
 
         ## Renvoie
-        - `.Action | .Transaction`
+        - `.Archive | .Transaction`
         """
 
         id = NSID(id)
-        _data = self.archives.get(id)
+        _data = self._get_by_ID('archives', id)
 
         if _data is None:
             return None
 
-        if _data['type'] == "transaction":
-            archive = Transaction(_data['author'], _data['target'], _data['amount'])
-
-            archive.reason = _data['reason']
-            archive.currency = _data['currency']
+        if _data['_type'] == "transaction":
+            archive = Transaction(_data['author'], _data['target'])
         else:
-            archive = Action(_data['author'], _data['target'])
+            archive = Archive(_data['author'], _data['target'])
 
         archive.id = id
         archive.action = _data['action']
         archive.date = _data['date']
+        archive.details = _data['details']
 
         return archive
 
-    def _fetch_archives(self, **query) -> list[ Action | Transaction ]:
+    def _fetch_archives(self, **query) -> list[ Archive | Transaction ]:
         """
         Récupère une liste d'archives correspondant à la requête.
 
@@ -243,9 +240,9 @@ class EconomyInstance(Instance):
             Requête pour filtrer les archives.
 
         ## Renvoie
-        - `list[Action | Transaction]`
+        - `list[.Archive | .Transaction]`
         """
 
         _res = self.fetch('archives', **query)
 
-        return [ self._get_archive(archive['key']) for archive in _res ]
+        return [ self._get_archive(archive['id']) for archive in _res ]

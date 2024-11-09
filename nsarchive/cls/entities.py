@@ -29,7 +29,7 @@ class PositionPermissions:
         self.vote_representatives = False # Participer aux élections législatives
 
     def edit(self, **permissions: bool) -> None:
-        for perm in permissions.values():
+        for perm in permissions.items():
             self.__setattr__(*perm)
 
 class Position:

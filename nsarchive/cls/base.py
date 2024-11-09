@@ -37,7 +37,7 @@ class Instance:
     def __init__(self, client: Client):
         self.db = client
 
-    def _select_from_db(self, table: str, key: str, value: str) -> dict:
+    def _select_from_db(self, table: str, key: str, value: str) -> list:
         """
         Récupère des données JSON d'une table Supabase en fonction de l'ID.
 
@@ -112,11 +112,12 @@ class Instance:
         matches = []
 
         for key, value in query.items():
-            matches.append(self._select_from_db(table, key, value))
+            entity = self._select_from_db(table, key, value)
+            if entity is not None: matches.append(entity[0])
 
         _res = []
 
-        for item in matches[0]:
+        for item in matches:
             if all(item in sublist for sublist in matches[1:]):
                 _res.append(item)
 

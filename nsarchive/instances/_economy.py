@@ -39,8 +39,9 @@ class EconomyInstance(Instance):
         account = BankAccount(id)
         account.amount = _data['amount']
         account.frozen = _data['frozen']
-        account.owner = _data['owner_id']
+        account.owner = NSID(_data['owner_id'])
         account.bank = _data['bank']
+        account.income = _data['income']
 
         return account
 
@@ -52,7 +53,8 @@ class EconomyInstance(Instance):
             'amount': account.amount,
             'frozen': account.frozen, 
             'owner_id': account.owner, 
-            'bank': account.bank
+            'bank': account.bank,
+            'income': account.income
         }
 
         self._put_in_db('accounts', _data)

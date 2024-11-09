@@ -18,6 +18,7 @@ from .cls.base import NSID
 from .cls.archives import *
 from .cls.entities import *
 from .cls.republic import *
+from .cls.economy import *
 
 from .cls.exceptions import *
 

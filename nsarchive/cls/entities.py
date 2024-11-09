@@ -141,7 +141,7 @@ class Organization(Entity):
         self.members: list[GroupMember] = []
 
         self.parts: dict[NSID, int] = {
-            self.owner.id: 1
+            self.id: 1
         }
 
     def add_certification(self, certification: str) -> None:

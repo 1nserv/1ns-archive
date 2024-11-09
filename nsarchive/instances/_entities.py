@@ -67,7 +67,7 @@ class EntityInstance(Instance):
 
             for _member in _data['members']:
                 member = GroupMember(_member['id'])
-                member.permission_level = _member['level']
+                member.permission_level = _member['position']
 
                 _member_profile = self.get_entity(member.id)
 
@@ -169,7 +169,7 @@ class EntityInstance(Instance):
 
         _res = self.fetch('entities', **query)
 
-        return [ self.get_entity(NSID(entity['key'])) for entity in _res if entity is not None ]
+        return [ self.get_entity(NSID(entity['id'])) for entity in _res if entity is not None ]
 
     def get_entity_groups(self, id: str | NSID) -> list[Organization]:
         """

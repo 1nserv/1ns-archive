@@ -167,7 +167,8 @@ class EntityInstance(Instance):
         - `list[Entity | User | Organization]`
         """
 
-        _res = self.fetch('entities', **query)
+        _res = self.fetch('individuals', **query)
+        _res.extend(self.fetch('organizations', **query))
 
         return [ self.get_entity(NSID(entity['id'])) for entity in _res if entity is not None ]
 
@@ -221,8 +222,8 @@ class EntityInstance(Instance):
             return None
 
         position = Position(id)
-        position.name = _data['name']
-        position.permissions.edit(dict(zip(_data['permissions'], True)))
+        position.name = _data['title']
+        position.permissions.edit(**{ p: True for p in _data['permissions'] })
 
         return position
 

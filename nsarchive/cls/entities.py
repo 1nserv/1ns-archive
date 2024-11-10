@@ -43,7 +43,7 @@ class Entity:
         self.id: NSID = NSID(id) # ID hexadécimal de l'entité (ou nom dans le cas de l'entreprise)
         self.name: str = "Entité Inconnue"
         self.registerDate: int = 0
-        self.legalPosition: Position = Position()
+        self.position: Position = Position()
         self.additional: dict = {}
 
     def set_name(self, new_name: str) -> None:
@@ -53,7 +53,7 @@ class Entity:
         self.name = new_name
 
     def set_position(self, position: str) -> None:
-        self.legalPosition = position
+        self.position = position
 
     def add_link(self, key: str, value: str | int) -> None:
         if isinstance(value, str) or isinstance(value, int):

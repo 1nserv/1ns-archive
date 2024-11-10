@@ -11,7 +11,7 @@ class Vote:
         self.startDate: int = 0
         self.endDate: int = 0
 
-class ClosedVote(Vote): # Meilleur nom pour cette classe en v2
+class Referendum(Vote):
     def __init__(self, id: str | NSID, title: str) -> None:
         super().__init__(id, title, ('yes', 'no', 'blank'))
 

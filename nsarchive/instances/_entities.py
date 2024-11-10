@@ -72,7 +72,7 @@ class EntityInstance(Instance):
                 _member_profile = self.get_entity(member.id)
 
                 member.set_name(_member_profile.name)
-                member.legalPosition = _member_profile.legalPosition
+                member.position = _member_profile.position
                 member.registerDate = _member_profile.registerDate
 
                 member.xp = _member_profile.xp
@@ -89,7 +89,7 @@ class EntityInstance(Instance):
             entity = Entity(id)
 
         entity.name = _data['name']
-        entity.legalPosition = _data['position'] # Métier si c'est un utilisateur, domaine professionnel si c'est un collectif
+        entity.position = _data['position'] # Métier si c'est un utilisateur, domaine professionnel si c'est un collectif
         entity.registerDate = _data['register_date']
 
         for  key, value in _data.get('additional', {}).items():
@@ -114,7 +114,7 @@ class EntityInstance(Instance):
         _data = {
             'id': entity.id,
             'name': entity.name,
-            'position': entity.legalPosition,
+            'position': entity.position,
             'register_date': entity.registerDate,
             'additional': {},
         }

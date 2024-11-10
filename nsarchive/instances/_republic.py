@@ -26,7 +26,7 @@ class RepublicInstance(Instance):
     ---- VOTES & REFERENDUMS ----
     """
 
-    def get_vote(self, id: str | NSID) -> Vote | ClosedVote | Lawsuit:
+    def get_vote(self, id: str | NSID) -> Vote | Referendum | Lawsuit:
         """
         Récupère un vote spécifique.
 
@@ -44,10 +44,10 @@ class RepublicInstance(Instance):
         if _data is None:
             return None
 
-        if _data['_type'] == 'open':
+        if _data['_type'] == 'vote':
             vote = Vote(id, _data['title'], tuple(_data['choices'].keys()))
-        elif _data['_type'] == 'closed':
-            vote = ClosedVote(id, _data['title'])
+        elif _data['_type'] == 'referendum':
+            vote = Referendum(id, _data['title'])
         elif _data['_type'] == 'lawsuit':
             vote = Lawsuit(id, _data['title'])
         else:
@@ -60,14 +60,14 @@ class RepublicInstance(Instance):
 
         return vote
 
-    def save_vote(self, vote: Vote | ClosedVote) -> None:
+    def save_vote(self, vote: Vote | Referendum) -> None:
         """Sauvegarde un vote dans la base de données."""
 
         vote.id = NSID(vote.id)
 
         _data = {
-            '_type':'open' if type(vote) == Vote else\
-                    'closed' if type(vote) == ClosedVote else\
+            '_type':'vote' if type(vote) == Vote else\
+                    'referendum' if type(vote) == Referendum else\
                     'lawsuit' if type(vote) == Lawsuit else\
                     'unknown',
             'title': vote.title,

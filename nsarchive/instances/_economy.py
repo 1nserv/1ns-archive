@@ -68,19 +68,66 @@ class EconomyInstance(Instance):
         self.save_account(account)
 
     """
-    ---- VENTES ----
+    ---- OBJETS & VENTES ----
     """
 
-    def get_sale(self, id: str | NSID) -> Sale | None:
+    def save_item(self, item: Item) -> None:
+        """
+        Sauvegarde des infos à propos d'un item.
+
+        ## Paramètres
+        item: `.Item`\n
+            Article à sauvegarder
+        """
+
+        _item = item.__dict__
+        self._put_in_db('items', _item)
+
+    def get_item(self, id: NSID) -> Item | None:
+        """
+        Récupère des informations à propos d'un item.
+
+        ## Paramètres
+        id: `NSID`\n
+            ID de l'item
+
+        ## Retourne
+        - `.Item` si quelque chose est trouvé, sinon
+        - `None`
+        """
+
+        _item = self._get_by_ID('items', id)
+
+        if _item is None:
+            return
+
+        item = Item(id)
+        item.title = _item['title']
+        item.emoji = _item['emoji']
+
+        return item
+
+    def delete_item(self, item: Item) -> None:
+        """
+        Annule le référencement d'un item.
+
+        ## Paramètres
+        item: `.Item`\n
+            Item à vendre
+        """
+
+        self._delete_by_ID('items', item.id)
+
+    def get_sale(self, id: NSID) -> Sale | None:
         """
         Récupère une vente disponible sur le marketplace.
 
         ## Paramètres
-        id: `str | NSID`\n
-            ID de l'item.
+        id: `NSID`\n
+            ID de la vente.
 
         ## Renvoie
-        - `.Item | None`
+        - `.Sale | None`
         """
 
         id = NSID(id)
@@ -89,8 +136,10 @@ class EconomyInstance(Instance):
 
         if _data is None:
             return None
+        
+        item = self.get_item(_data['id'])
 
-        sale = Sale(NSID(id))
+        sale = Sale(NSID(id), Item(_data['id']) if item is None else item)
         sale.__dict__ = _data
 
         return sale
@@ -149,8 +198,7 @@ class EconomyInstance(Instance):
         inventory = Inventory(id)
 
         for _item in _data['objects']:
-            item = Item(_item['id'])
-            item.__dict__ = _item
+            item = self.get_item(_item)
 
             inventory.objects.append(item)
 
@@ -165,10 +213,7 @@ class EconomyInstance(Instance):
             Inventaire à sauvegarder
         """
 
-        _data = {
-            "owner_id": inventory.owner_id,
-            "objects": [ object.__dict__ for object in inventory.objects ]
-        }
+        _data = inventory.__dict__
 
         self._put_in_db('inventories', _data)
 

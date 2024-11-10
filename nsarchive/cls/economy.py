@@ -19,17 +19,20 @@ class Item:
 class Inventory:
     def __init__(self, owner_id: NSID) -> None:
         self.owner_id: NSID = NSID(owner_id)
-        self.objects: list[Item] = []
+        self.objects: dict[str, NSID] = {}
 
     def append(self, item: Item, quantity: int = 1):
-        self.objects.extend(quantity * [ item ])
+        if item.id in self.objects.keys():
+            self.objects[item.id] += quantity
+        else:
+            self.objects[item.id] = quantity
 
     def throw(self, item: Item, quantity: int = 1):
-        if quantity > self.objects.count(item):
-            quantity = self.objects.count(item)
-
-        for i in range(quantity):
-            self.objects.remove(item)
+        if item.id in self.objects.keys():
+            if self.objects[item.id] > quantity:
+                self.objects[item.id] -= quantity
+            else:
+                self.objects[item.id] = 0
 
 class Sale:
     def __init__(self, id: NSID, item: Item) -> None:

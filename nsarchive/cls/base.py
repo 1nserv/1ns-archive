@@ -113,12 +113,13 @@ class Instance:
 
         for key, value in query.items():
             entity = self._select_from_db(table, key, value)
-            if entity is not None: matches.append(entity[0])
 
-        _res = []
+            if entity is not None:
+                matches.append(entity)
 
-        for item in matches:
-            if all(item in sublist for sublist in matches[1:]):
-                _res.append(item)
+        if not matches or len(matches) != len(query):
+            return []
+
+        _res = [ item for item in matches[0] if all(item in match for match in matches[1:]) ]
 
         return _res

@@ -259,7 +259,7 @@ class EntityInstance(Instance):
         elif type(archive) == Report:
             _data['_type'] = "report"
         else:
-            _data['_type'] = "unknown"
+            _data['_type'] = "action"
 
         self._put_in_db('archives', _data)
 

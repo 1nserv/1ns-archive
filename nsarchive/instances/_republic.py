@@ -222,7 +222,7 @@ class RepublicInstance(Instance):
         elif type(archive) == Demotion:
             _data['_type'] = "demotion"
         else:
-            _data['_type'] = "unknown"
+            _data['_type'] = "action"
 
         self._put_in_db('archives', _data)
         self._put_in_db('mandate', _data) # Ajouter les archives à celle du mandat actuel

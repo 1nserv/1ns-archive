@@ -167,8 +167,20 @@ class EntityInstance(Instance):
         - `list[Entity | User | Organization]`
         """
 
-        _res = self.fetch('individuals', **query)
-        _res.extend(self.fetch('organizations', **query))
+        if "_type" in query.keys():
+            if query["_type"] == "individual":
+                del query["_type"]
+                _res = self.fetch('individuals', **query)
+            elif query["_type"] == "organization":
+                del query["_type"]
+                _res = self.fetch('organizations', **query)
+            else:
+                del query["_type"]
+                _res = self.fetch('individuals', **query)
+                _res.extend(self.fetch('organizations', **query))
+        else:
+            _res = self.fetch('individuals', **query)
+            _res.extend(self.fetch('organizations', **query))
 
         return [ self.get_entity(NSID(entity['id'])) for entity in _res if entity is not None ]
 

@@ -14,8 +14,8 @@ class RepublicInstance(Instance):
     Gère les interactions avec les votes, les archives de la république, et les fonctionnaires.
 
     ## Informations
-    - Résultats des votes: `.Vote | .ClosedVote`
-    - Différentes institutions: `.Institutions | .Administration | .Government | .Assembly | .Court | .PoliceForces`
+    - Résultats des votes et procès: `.Vote | .Referendum | .Lawsuit`
+    - Différentes institutions: `.State | .Administration | .Government | .Assembly | .Court | .PoliceForces`
     - Occupants des différents rôles et historique de leurs actions: `.Official`
     """
 
@@ -35,7 +35,7 @@ class RepublicInstance(Instance):
             ID du vote.
 
         ## Renvoie
-        - `.Vote | .ClosedVote`
+        - `.Vote | .Referendum | .Lawsuit`
         """
 
         id = NSID(id)
@@ -60,7 +60,7 @@ class RepublicInstance(Instance):
 
         return vote
 
-    def save_vote(self, vote: Vote | Referendum) -> None:
+    def save_vote(self, vote: Vote | Referendum | Lawsuit) -> None:
         """Sauvegarde un vote dans la base de données."""
 
         vote.id = NSID(vote.id)

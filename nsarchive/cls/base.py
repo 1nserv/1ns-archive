@@ -123,3 +123,59 @@ class Instance:
         _res = [ item for item in matches[0] if all(item in match for match in matches[1:]) ]
 
         return _res
+
+    def _upload_to_storage(self, bucket: str, data: bytes, path: str, overwrite: bool = False) -> dict:
+        """
+        Envoie un fichier dans un bucket Supabase.
+
+        ## Paramètres
+        bucket: `str`\n
+            Nom du bucket où le fichier sera stocké
+        data: `bytes`\n
+            Données à uploader
+        path: `str`\n
+            Chemin dans le bucket où le fichier sera stocké
+
+        ## Renvoie
+        - `dict` contenant les informations de l'upload si réussi
+        - `None` en cas d'échec
+        """
+
+        if len(data) > 5 * 10 ** 3:
+            raise ValueError("La limite d'un fichier à upload est de 1Mo")
+
+        existing_files = self.db.storage.from_(bucket).list({ "path": path })
+
+        if existing_files and not overwrite:
+            raise FileExistsError("Le fichier existe déjà")
+
+        res = self.db.storage.from_(bucket).upload(path, data)
+
+        if res.get("error"):
+            print("Erreur lors de l'upload:", res["error"])
+
+        return res
+
+    def _download_from_storage(self, bucket: str, path: str) -> bytes:
+        """
+        Télécharge un fichier depuis le stockage Supabase.
+
+        ## Paramètres
+        bucket: `str`\n
+            Nom du bucket où il faut chercher le fichier 
+        path: `str`\n
+            Chemin du fichier dans le bucket
+
+        ## Renvoie
+        - Le fichier demandé en `bytes`
+        """
+
+        existing_files = self.db.storage.from_(bucket).list({ "path": path })
+        if not existing_files: return None
+
+        res = self.db.storage.from_(bucket).download(path)
+
+        if res.get("error"):
+            raise Exception("Erreur lors du téléchargement:", res["error"])
+        else:
+            return res["data"]

@@ -3,7 +3,7 @@ import time
 from .exceptions import *
 from .base import NSID
 
-from ..utils import assets
+from .. import utils
 
 class PositionPermissions:
     """
@@ -138,7 +138,7 @@ class Organization(Entity):
         super().__init__(NSID(id))
 
         self.owner: Entity
-        self.avatar: bytes = assets.open('default_avatar.png')
+        self.avatar: bytes = utils.open_asset('default_avatar.png')
 
         self.certifications: dict = {}
         self.members: list[GroupMember] = []

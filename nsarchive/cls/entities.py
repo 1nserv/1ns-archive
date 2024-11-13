@@ -39,7 +39,7 @@ class Position:
         self.permissions: PositionPermissions = PositionPermissions()
 
     def __repr__(self):
-        return self.name
+        return self.id
 
 class Entity:
     def __init__(self, id: str | NSID) -> None:

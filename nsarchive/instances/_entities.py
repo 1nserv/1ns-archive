@@ -114,7 +114,7 @@ class EntityInstance(Instance):
         _data = {
             'id': entity.id,
             'name': entity.name,
-            'position': entity.position.id,
+            'position': entity.position,
             'register_date': entity.registerDate,
             'additional': {},
         }

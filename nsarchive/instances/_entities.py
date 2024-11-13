@@ -89,7 +89,7 @@ class EntityInstance(Instance):
             entity = Entity(id)
 
         entity.name = _data['name']
-        entity.position = _data['position'] # Métier si c'est un utilisateur, domaine professionnel si c'est un collectif
+        entity.position = self.get_position(_data['position']) # Métier si c'est un utilisateur, domaine professionnel si c'est un collectif
         entity.registerDate = _data['register_date']
 
         for  key, value in _data.get('additional', {}).items():
@@ -114,7 +114,7 @@ class EntityInstance(Instance):
         _data = {
             'id': entity.id,
             'name': entity.name,
-            'position': entity.position,
+            'position': entity.position.id,
             'register_date': entity.registerDate,
             'additional': {},
         }

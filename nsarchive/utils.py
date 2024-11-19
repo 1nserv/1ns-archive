@@ -5,8 +5,7 @@ from PIL import Image
 
 def open_asset(path: str) -> bytes:
     curr_dir = os.path.dirname(os.path.abspath(os.path.join(__file__)))
-    parent_dir = os.path.dirname(curr_dir)
-    asset_path = os.path.join(parent_dir, 'assets', path)
+    asset_path = os.path.join(curr_dir, 'assets', path)
 
     image = Image.open(asset_path)
     val = io.BytesIO()

@@ -136,7 +136,7 @@ class EntityInstance(Instance):
                     'position': member.permission_level
                 }
 
-                _data['members'] += [_member]                
+                _data['members'] += [_member]
         elif type(entity) == User:
             _data['xp'] = entity.xp
             _data['boosts'] = entity.boosts
@@ -155,7 +155,7 @@ class EntityInstance(Instance):
 
         self._delete_by_ID('individuals' if isinstance(entity, User) else 'organizations', NSID(entity.id))
 
-    def fetch_entities(self, **query: dict) -> list[ Entity | User | Organization ]:
+    def fetch_entities(self, **query: typing.Any) -> list[ Entity | User | Organization ]:
         """
         Récupère une liste d'entités en fonction d'une requête.
 

@@ -200,7 +200,6 @@ class EntityInstance(Instance):
 
         id = NSID(id)
         groups = self.fetch_entities(_type = 'organization')
-        groups.extend(self.fetch_entities(_type = 'organization', owner_id = id))
 
         for group in groups:
             if group is None:

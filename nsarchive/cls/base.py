@@ -151,14 +151,9 @@ class Instance:
         if len(data) > 5 * 1000 ** 3:
             raise ValueError("La limite d'un fichier à upload est de 1Mo")
 
-        existing_files = self.db.storage.from_(bucket).list({ "path": path })
-
-        if existing_files and not overwrite:
-            raise FileExistsError("Le fichier existe déjà")
-
         res = self.db.storage.from_(bucket).upload(path, data, options)
 
-        if res.get("error"):
+        if res.json().get("error"):
             print("Erreur lors de l'upload:", res["error"])
 
         return res

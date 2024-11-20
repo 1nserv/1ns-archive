@@ -147,7 +147,7 @@ class Instance:
         - `None` en cas d'échec
         """
 
-        if len(data) > 5 * 10 ** 3:
+        if len(data) > 5 * 1000 ** 3:
             raise ValueError("La limite d'un fichier à upload est de 1Mo")
 
         existing_files = self.db.storage.from_(bucket).list({ "path": path })

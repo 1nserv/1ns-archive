@@ -1,3 +1,4 @@
+import io
 import typing
 
 from supabase import Client
@@ -130,7 +131,7 @@ class Instance:
 
         return _res
 
-    def _upload_to_storage(self, bucket: str, data: bytes, path: str, overwrite: bool = False) -> dict:
+    def _upload_to_storage(self, bucket: str, data: bytes, path: str, overwrite: bool = False, options: dict = {'content-type': 'image/png'}) -> dict:
         """
         Envoie un fichier dans un bucket Supabase.
 
@@ -155,7 +156,7 @@ class Instance:
         if existing_files and not overwrite:
             raise FileExistsError("Le fichier existe déjà")
 
-        res = self.db.storage.from_(bucket).upload(path, data)
+        res = self.db.storage.from_(bucket).upload(path, data, options)
 
         if res.get("error"):
             print("Erreur lors de l'upload:", res["error"])

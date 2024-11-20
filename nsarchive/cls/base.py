@@ -174,12 +174,6 @@ class Instance:
         - Le fichier demandé en `bytes`
         """
 
-        existing_files = self.db.storage.from_(bucket).list(path)
-        if not existing_files: return None
-
         res = self.db.storage.from_(bucket).download(path)
 
-        if res.json().get("error"):
-            raise Exception("Erreur lors du téléchargement:", res["error"])
-        else:
-            return res["data"]
+        return res

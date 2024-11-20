@@ -148,6 +148,8 @@ class Instance:
         - `None` en cas d'échec
         """
 
+        options["upsert"] = overwrite
+
         if len(data) > 5 * 1000 ** 3:
             raise ValueError("La limite d'un fichier à upload est de 1Mo")
 

@@ -1,3 +1,4 @@
+import json
 import typing
 
 from supabase import Client
@@ -37,7 +38,7 @@ class Instance:
     def __init__(self, client: Client):
         self.db = client
 
-    def _select_from_db(self, table: str, key: str, value: str) -> list:
+    def _select_from_db(self, table: str, key: str = None, value: str = None) -> list:
         """
         Récupère des données JSON d'une table Supabase en fonction de l'ID.
 
@@ -54,7 +55,10 @@ class Instance:
         - `None` si aucune donnée n'est trouvée
         """
 
-        res = self.db.from_(table).select("*").eq(key, value).execute()
+        if key and value:
+            res = self.db.from_(table).select("*").eq(key, value).execute()
+        else:
+            res = self.db.from_(table).select("*").execute()
 
         if res.data:
             return res.data
@@ -113,12 +117,63 @@ class Instance:
 
         for key, value in query.items():
             entity = self._select_from_db(table, key, value)
-            if entity is not None: matches.append(entity[0])
 
-        _res = []
+            if entity is not None:
+                matches.append(entity)
 
-        for item in matches:
-            if all(item in sublist for sublist in matches[1:]):
-                _res.append(item)
+        if query == {}:
+            matches = [ self._select_from_db(table) ]
+
+        if not matches or (len(matches) != len(query) and query != {}):
+            return []
+
+        _res = [ item for item in matches[0] if all(item in match for match in matches[1:]) ]
 
         return _res
+
+    def _upload_to_storage(self, bucket: str, data: bytes, path: str, overwrite: bool = False, options: dict = {'content-type': 'image/png'}) -> dict:
+        """
+        Envoie un fichier dans un bucket Supabase.
+
+        ## Paramètres
+        bucket: `str`\n
+            Nom du bucket où le fichier sera stocké
+        data: `bytes`\n
+            Données à uploader
+        path: `str`\n
+            Chemin dans le bucket où le fichier sera stocké
+
+        ## Renvoie
+        - `dict` contenant les informations de l'upload si réussi
+        - `None` en cas d'échec
+        """
+
+        options["upsert"] = json.dumps(overwrite)
+
+        if len(data) > 5 * 1000 ** 3:
+            raise ValueError("La limite d'un fichier à upload est de 1Mo")
+
+        res = self.db.storage.from_(bucket).upload(path, data, options)
+
+        if res.json().get("error"):
+            print("Erreur lors de l'upload:", res["error"])
+
+        return res
+
+    def _download_from_storage(self, bucket: str, path: str) -> bytes:
+        """
+        Télécharge un fichier depuis le stockage Supabase.
+
+        ## Paramètres
+        bucket: `str`\n
+            Nom du bucket où il faut chercher le fichier 
+        path: `str`\n
+            Chemin du fichier dans le bucket
+
+        ## Renvoie
+        - Le fichier demandé en `bytes`
+        """
+
+        res = self.db.storage.from_(bucket).download(path)
+
+        return res

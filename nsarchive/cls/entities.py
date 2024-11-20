@@ -3,7 +3,7 @@ import time
 from .exceptions import *
 from .base import NSID
 
-from ..utils import assets
+from .. import utils
 
 class PositionPermissions:
     """
@@ -38,6 +38,9 @@ class Position:
         self.id = id
         self.permissions: PositionPermissions = PositionPermissions()
 
+    def __repr__(self):
+        return self.id
+
 class Entity:
     def __init__(self, id: str | NSID) -> None:
         self.id: NSID = NSID(id) # ID hexadécimal de l'entité (ou nom dans le cas de l'entreprise)
@@ -52,7 +55,7 @@ class Entity:
 
         self.name = new_name
 
-    def set_position(self, position: str) -> None:
+    def set_position(self, position: Position) -> None:
         self.position = position
 
     def add_link(self, key: str, value: str | int) -> None:
@@ -135,7 +138,7 @@ class Organization(Entity):
         super().__init__(NSID(id))
 
         self.owner: Entity
-        self.avatar: bytes = assets.open('default_avatar.png')
+        self.avatar: bytes = utils.open_asset('default_avatar.png')
 
         self.certifications: dict = {}
         self.members: list[GroupMember] = []

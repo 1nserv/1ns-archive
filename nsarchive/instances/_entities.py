@@ -85,11 +85,12 @@ class EntityInstance(Instance):
 
             entity.certifications = _data['certifications']
             entity.parts = _data['parts']
+            entity.avatar = self._download_from_storage('organizations', f"avatars/{entity.id}")
         else:
             entity = Entity(id)
 
         entity.name = _data['name']
-        entity.position = _data['position'] # Métier si c'est un utilisateur, domaine professionnel si c'est un collectif
+        entity.position = self.get_position(_data['position']) # Métier si c'est un utilisateur, domaine professionnel si c'est un collectif
         entity.registerDate = _data['register_date']
 
         for  key, value in _data.get('additional', {}).items():
@@ -114,7 +115,7 @@ class EntityInstance(Instance):
         _data = {
             'id': entity.id,
             'name': entity.name,
-            'position': entity.position,
+            'position': entity.position.id,
             'register_date': entity.registerDate,
             'additional': {},
         }
@@ -136,7 +137,9 @@ class EntityInstance(Instance):
                     'position': member.permission_level
                 }
 
-                _data['members'] += [_member]                
+                _data['members'] += [_member]
+
+            self._upload_to_storage('organizations', entity.avatar, f'/avatars/{entity.id}')
         elif type(entity) == User:
             _data['xp'] = entity.xp
             _data['boosts'] = entity.boosts
@@ -155,7 +158,7 @@ class EntityInstance(Instance):
 
         self._delete_by_ID('individuals' if isinstance(entity, User) else 'organizations', NSID(entity.id))
 
-    def fetch_entities(self, **query: dict) -> list[ Entity | User | Organization ]:
+    def fetch_entities(self, **query: typing.Any) -> list[ Entity | User | Organization ]:
         """
         Récupère une liste d'entités en fonction d'une requête.
 
@@ -167,8 +170,20 @@ class EntityInstance(Instance):
         - `list[Entity | User | Organization]`
         """
 
-        _res = self.fetch('individuals', **query)
-        _res.extend(self.fetch('organizations', **query))
+        if "_type" in query.keys():
+            if query["_type"] == "individual":
+                del query["_type"]
+                _res = self.fetch('individuals', **query)
+            elif query["_type"] == "organization":
+                del query["_type"]
+                _res = self.fetch('organizations', **query)
+            else:
+                del query["_type"]
+                _res = self.fetch('individuals', **query)
+                _res.extend(self.fetch('organizations', **query))
+        else:
+            _res = self.fetch('individuals', **query)
+            _res.extend(self.fetch('organizations', **query))
 
         return [ self.get_entity(NSID(entity['id'])) for entity in _res if entity is not None ]
 
@@ -186,7 +201,6 @@ class EntityInstance(Instance):
 
         id = NSID(id)
         groups = self.fetch_entities(_type = 'organization')
-        groups.extend(self.fetch_entities(_type = 'organization', owner_id = id))
 
         for group in groups:
             if group is None:
@@ -247,7 +261,7 @@ class EntityInstance(Instance):
         elif type(archive) == Report:
             _data['_type'] = "report"
         else:
-            _data['_type'] = "unknown"
+            _data['_type'] = "action"
 
         self._put_in_db('archives', _data)
 

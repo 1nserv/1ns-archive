@@ -244,7 +244,7 @@ class EconomyInstance(Instance):
         if type(archive) == Transaction:
             _data['_type'] = "transaction"
         else:
-            _data['_type'] = "unknown"
+            _data['_type'] = "action"
 
         self._put_in_db('archives', _data)
 

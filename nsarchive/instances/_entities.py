@@ -85,6 +85,7 @@ class EntityInstance(Instance):
 
             entity.certifications = _data['certifications']
             entity.parts = _data['parts']
+            entity.avatar = self._download_from_storage('organizations', f"avatars/{entity.id}")
         else:
             entity = Entity(id)
 

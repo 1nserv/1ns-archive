@@ -55,7 +55,7 @@ class Entity:
 
         self.name = new_name
 
-    def set_position(self, position: str) -> None:
+    def set_position(self, position: Position) -> None:
         self.position = position
 
     def add_link(self, key: str, value: str | int) -> None:

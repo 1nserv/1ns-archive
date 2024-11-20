@@ -179,7 +179,7 @@ class Instance:
 
         res = self.db.storage.from_(bucket).download(path)
 
-        if res.get("error"):
+        if res.json().get("error"):
             raise Exception("Erreur lors du téléchargement:", res["error"])
         else:
             return res["data"]

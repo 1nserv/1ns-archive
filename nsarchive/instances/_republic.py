@@ -126,13 +126,13 @@ class RepublicInstance(Instance):
 
         user = Official(id)
         for mandate in _mandates:
-            if mandate['position'].startswith('MIN'):
-                mandate['position'] = 'MIN'
+            if mandate['details']['position'].startswith('MIN'):
+                mandate['details']['position'] = 'MIN'
 
             try:
-                user.mandates[mandate['position']] += 1
+                user.mandates[mandate['details']['position']] += 1
             except KeyError:
-                user.mandates[mandate['position']] = 1
+                user.mandates[mandate['details']['position']] = 1
 
         for contrib in _contributions:
             try:
@@ -151,14 +151,14 @@ class RepublicInstance(Instance):
         court = Court()
         police_forces = PoliceForces()
 
-        _get_position: list[dict] = lambda pos : self._select_from_db('functions', 'id', pos)['users']
-
-        admin.members = [ self.get_official(user['id']) for user in _get_position('ADMIN') ]
+        _get_position: list[dict] = lambda pos : self._select_from_db('functions', 'id', pos)[0]['users']
+        print(_get_position('ADMIN'))
+        admin.members = [ self.get_official(user) for user in _get_position('ADMIN') ]
         admin.president = self.get_official(0xF7DB60DD1C4300A) # happex (remplace Kheops pour l'instant)
 
         gov.president = self.get_official(0x0)
 
-        minister = lambda code : self.get_official(_get_position(f'MIN_{code}')[0]['id'])
+        minister = lambda code : self.get_official(_get_position(f'MIN_{code}')[0])
         gov.prime_minister = minister('PRIM')
         gov.economy_minister = minister('ECO')
         gov.inner_minister = minister('INN')
@@ -167,13 +167,13 @@ class RepublicInstance(Instance):
         gov.outer_minister = minister('OUT')
 
         assembly.president = self.get_official(_get_position('PRE_AS')[0])
-        assembly.members = [ self.get_official(user['id']) for user in _get_position('REPR') ]
+        assembly.members = [ self.get_official(user) for user in _get_position('REPR') ]
 
         court.president = gov.justice_minister
-        court.members = [ self.get_official(user['id']) for user in _get_position('JUDGE') ]
+        court.members = [ self.get_official(user) for user in _get_position('JUDGE') ]
 
         police_forces.president = gov.inner_minister
-        police_forces.members = [ self.get_official(user['id']) for user in _get_position('POLICE') ]
+        police_forces.members = [ self.get_official(user) for user in _get_position('POLICE') ]
 
         instits = State()
         instits.administration = admin

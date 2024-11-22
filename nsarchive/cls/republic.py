@@ -74,7 +74,7 @@ class Official:
 class Administration:
     def __init__(self) -> None:
         self.president: Official
-        self.members: list[Official]
+        self.members: list[Official] = []
 
 class Government:
     def __init__(self, president: Official) -> None:
@@ -91,17 +91,17 @@ class Court:
     def __init__(self) -> None:
         self.president: Official
         # On discutera de la mise en place d'un potentiel président. Pour l'instant c'est le Ministre de la Justice
-        self.members: list[Official]
+        self.members: list[Official] = []
 
 class Assembly:
     def __init__(self) -> None:
         self.president: Official
-        self.members: list[Official]
+        self.members: list[Official] = []
 
 class PoliceForces:
     def __init__(self) -> None:
         self.president: Official
-        self.members: list[Official]
+        self.members: list[Official] = []
 
 class State:
     def __init__(self) -> None:

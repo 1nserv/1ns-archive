@@ -2,22 +2,53 @@ from nsarchive.cls.base import NSID
 
 # Votes
 
+class VoteOption:
+    def __init__(self, id: str, title: str = None, count: int = 0):
+        self.id = id
+        self.title = title if title else id
+        self.count = count
+
 class Vote:
-    def __init__(self, id: str | NSID, title: str, choices: tuple[str]) -> None:
+    def __init__(self, id: str | NSID, title: str) -> None:
         self.id: NSID = NSID(id)
         self.title: str = title
-        self.choices = { choice : 0 for choice in choices }
-        self.author: str = '0'
+        self.choices: list[VoteOption] = []
+        self.author: NSID = NSID("0")
         self.startDate: int = 0
         self.endDate: int = 0
 
+    def by_id(self, id: str) -> VoteOption:
+        for opt in self.choices:
+            if opt.id == id:
+                return opt
+
+    def sorted(self, titles_only: bool = False) -> list[VoteOption] | list[str]:
+        sorted_list: list[VoteOption] = sorted(self.choices, lambda opt : opt.count)
+
+        if titles_only:
+            return [ opt.id for opt in sorted_list ]
+        else:
+            return sorted_list
+
 class Referendum(Vote):
-    def __init__(self, id: str | NSID, title: str) -> None:
-        super().__init__(id, title, ('yes', 'no', 'blank'))
+    def __init__(self, id: NSID, title: str) -> None:
+        super().__init__(id, title)
+
+        self.choices = [
+            VoteOption('yes', 'Oui'),
+            VoteOption('no', 'Non'),
+            VoteOption('blank', 'Pas d\'avis'),
+        ]
 
 class Lawsuit(Vote):
-    def __init__(self, id: str | NSID, title: str) -> None:
-        super().__init__(id, title, ('innocent', 'guilty', 'blank'))
+    def __init__(self, id: NSID, title: str) -> None:
+        super().__init__(id, title)
+
+        self.choices = [
+            VoteOption('guilty', 'Coupable'),
+            VoteOption('innocent', 'Innocent'),
+            VoteOption('blank', 'Pas d\'avis'),
+        ]
 
 
 # Institutions (defs)
@@ -30,7 +61,6 @@ class Official:
             'PRE_REP': 0, # Président de la République
             'MIN': 0, # Différents ministres
             'PRE_AS': 0, # Président de l'Assemblée Nationale
-            'JUDGE': 0, # Juge
             'REPR': 0 # Député
         }
 

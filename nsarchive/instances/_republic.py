@@ -41,22 +41,34 @@ class RepublicInstance(Instance):
         id = NSID(id)
         _data = self._get_by_ID('votes', id)
 
-        if _data is None:
+        if not _data: # Pas dans les votes -> peut-être dans les procès
+            _data = self._get_by_ID('lawsuits', id)
+
+        if not _data: # Le vote n'existe juste pas
             return None
+        elif '_type' not in _data.keys(): # Le vote est un procès
+            _data['_type'] = "lawsuit"
 
         if _data['_type'] == 'vote':
-            vote = Vote(id, _data['title'], tuple(_data['choices'].keys()))
+            vote = Vote(id, _data['title'])
         elif _data['_type'] == 'referendum':
             vote = Referendum(id, _data['title'])
+            vote.choices = []
         elif _data['_type'] == 'lawsuit':
             vote = Lawsuit(id, _data['title'])
+            vote.choices = []
         else:
-            vote = Vote('0', 'Unknown Vote', ())
+            vote = Vote('0', 'Unknown Vote')
 
-        vote.author = _data['author']
-        vote.startDate = _data['startDate']
-        vote.endDate = _data['endDate']
-        vote.choices = _data['choices']
+        vote.author = _data['author_id']
+        vote.startDate = _data['start_date']
+        vote.endDate = _data['end_date']
+
+        for opt in _data['choices']:
+            option = VoteOption(opt["id"], opt["title"])
+            option.count = opt["count"]
+
+            vote.choices.append(option)
 
         return vote
 
@@ -70,14 +82,19 @@ class RepublicInstance(Instance):
                     'referendum' if type(vote) == Referendum else\
                     'lawsuit' if type(vote) == Lawsuit else\
                     'unknown',
+            'id': NSID(vote.id),
             'title': vote.title,
-            'author': NSID(vote.author),
-            'startDate': vote.startDate,
-            'endDate': vote.endDate,
-            'choices': vote.choices
+            'author_id': NSID(vote.author),
+            'start_date': vote.startDate,
+            'end_date': vote.endDate,
+            'choices': [ opt.__dict__ for opt in vote.choices ]
         }
 
-        self._put_in_db('votes', _data)
+        if type(vote) == Lawsuit:
+            del _data['_type']
+            self._put_in_db('lawsuits', _data)
+        else:
+            self._put_in_db('votes', _data)
 
     # Aucune possibilité de supprimer un vote
 
@@ -103,9 +120,9 @@ class RepublicInstance(Instance):
 
         base = 'mandate' if current_mandate else 'archives'
 
-        _contributions = self.fetch(base, {'author': id, '_type': 'contrib'})
-        _mandates = self.fetch(base, {'target': id, '_type': 'election'}) +\
-                    self.fetch(base, {'target': id, '_type': 'promotion'})
+        _contributions = self.fetch(base, author = id, _type = 'contrib')
+        _mandates = self.fetch(base, target = id, _type = 'election') +\
+                    self.fetch(base, target = id, _type = 'promotion')
 
         user = Official(id)
         for mandate in _mandates:
@@ -137,9 +154,9 @@ class RepublicInstance(Instance):
         _get_position: list[dict] = lambda pos : self._select_from_db('functions', 'id', pos)['users']
 
         admin.members = [ self.get_official(user['id']) for user in _get_position('ADMIN') ]
-        admin.president = self.get_official('F7DB60DD1C4300A') # happex (remplace Kheops pour l'instant)
+        admin.president = self.get_official(0xF7DB60DD1C4300A) # happex (remplace Kheops pour l'instant)
 
-        gov.president = self.get_official([0])
+        gov.president = self.get_official(0x0)
 
         minister = lambda code : self.get_official(_get_position(f'MIN_{code}')[0]['id'])
         gov.prime_minister = minister('PRIM')

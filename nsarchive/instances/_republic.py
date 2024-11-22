@@ -196,20 +196,20 @@ class RepublicInstance(Instance):
 
         get_ids = lambda institution : [ member.id for member in institutions.__getattribute__(institution).members ]
 
-        self._put_in_db('functions', { 'users': get_ids('administration') })
-        self._put_in_db('functions', { 'users': get_ids('assembly') })
-        self._put_in_db('functions', { 'users': get_ids('court') })
-        self._put_in_db('functions', { 'users': get_ids('police') })
+        self._put_in_db('functions', { 'id': 'ADMIN', 'users': get_ids('administration') })
+        self._put_in_db('functions', { 'id': 'REPR', 'users': get_ids('assembly') })
+        self._put_in_db('functions', { 'id': 'JUDGE', 'users': get_ids('court') })
+        self._put_in_db('functions', { 'id': 'POLICE', 'users': get_ids('police') })
 
-        self._put_in_db('functions', { 'users': [ institutions.assembly.president.id ] })
-        self._put_in_db('functions', { 'users': [ institutions.government.president.id ] })
+        self._put_in_db('functions', { 'id': 'PRE_AS', 'users': [ institutions.assembly.president.id ] })
+        self._put_in_db('functions', { 'id': 'PRE_REP', 'users': [ institutions.government.president.id ] })
 
-        self._put_in_db('functions', { 'users': [ institutions.government.prime_minister.id ] })
-        self._put_in_db('functions', { 'users': [ institutions.government.inner_minister.id ] })
-        self._put_in_db('functions', { 'users': [ institutions.government.justice_minister.id ] })
-        self._put_in_db('functions', { 'users': [ institutions.government.economy_minister.id ] })
-        self._put_in_db('functions', { 'users': [ institutions.government.press_minister.id ] })
-        self._put_in_db('functions', { 'users': [ institutions.government.outer_minister.id ] })
+        self._put_in_db('functions', { 'id': 'MIN_PRIM', 'users': [ institutions.government.prime_minister.id ] })
+        self._put_in_db('functions', { 'id': 'MIN_INN', 'users': [ institutions.government.inner_minister.id ] })
+        self._put_in_db('functions', { 'id': 'MIN_JUS', 'users': [ institutions.government.justice_minister.id ] })
+        self._put_in_db('functions', { 'id': 'MIN_ECO', 'users': [ institutions.government.economy_minister.id ] })
+        self._put_in_db('functions', { 'id': 'MIN_AUD', 'users': [ institutions.government.press_minister.id ] })
+        self._put_in_db('functions', { 'id': 'MIN_OUT', 'users': [ institutions.government.outer_minister.id ] })
 
     def new_mandate(self, institutions: State, weeks: int = 4) -> None:
         """
@@ -239,7 +239,7 @@ class RepublicInstance(Instance):
         elif type(archive) == Demotion:
             _data['_type'] = "demotion"
         else:
-            _data['_type'] = "action"
+            _data['_type'] = "unknown"
 
         self._put_in_db('archives', _data)
         self._put_in_db('mandate', _data) # Ajouter les archives à celle du mandat actuel

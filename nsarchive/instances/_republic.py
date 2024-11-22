@@ -263,9 +263,9 @@ class RepublicInstance(Instance):
             return None
 
         if _data['_type'] == "election":
-            archive = Election(_data['author'], _data['target'], _data['position'])
+            archive = Election(_data['author'], _data['target'], _data['details']['position'])
         elif _data['_type'] == "promotion":
-            archive = Promotion(_data['author'], _data['target'], _data['position'])
+            archive = Promotion(_data['author'], _data['target'], _data['details']['position'])
         elif _data['_type'] == "demotion":
             archive = Demotion(_data['author'], _data['target'])
         else:

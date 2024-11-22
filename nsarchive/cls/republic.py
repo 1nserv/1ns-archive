@@ -65,10 +65,9 @@ class Official:
         }
 
         self.contributions: dict = {
-            'project': 0,
-            'approved_project': 0, 
-            'admin_action': 0, 
-            'law_vote': 0
+            'propose_project': 0,
+            'success_project': 0, 
+            'vote_law': 0
         }
 
 class Administration:

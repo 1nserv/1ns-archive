@@ -152,7 +152,7 @@ class RepublicInstance(Instance):
         police_forces = PoliceForces()
 
         _get_position: list[dict] = lambda pos : self._select_from_db('functions', 'id', pos)[0]['users']
-        print(_get_position('ADMIN'))
+
         admin.members = [ self.get_official(user) for user in _get_position('ADMIN') ]
         admin.president = self.get_official(0xF7DB60DD1C4300A) # happex (remplace Kheops pour l'instant)
 

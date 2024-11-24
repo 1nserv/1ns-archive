@@ -139,7 +139,7 @@ class EntityInstance(Instance):
 
                 _data['members'] += [_member]
 
-            self._upload_to_storage('organizations', entity.avatar, f'/avatars/{entity.id}')
+            self._upload_to_storage('organizations', entity.avatar, f'/avatars/{entity.id}', overwrite = True)
         elif type(entity) == User:
             _data['xp'] = entity.xp
             _data['boosts'] = entity.boosts

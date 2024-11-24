@@ -41,22 +41,34 @@ class RepublicInstance(Instance):
         id = NSID(id)
         _data = self._get_by_ID('votes', id)
 
-        if _data is None:
+        if not _data: # Pas dans les votes -> peut-être dans les procès
+            _data = self._get_by_ID('lawsuits', id)
+
+        if not _data: # Le vote n'existe juste pas
             return None
+        elif '_type' not in _data.keys(): # Le vote est un procès
+            _data['_type'] = "lawsuit"
 
         if _data['_type'] == 'vote':
-            vote = Vote(id, _data['title'], tuple(_data['choices'].keys()))
+            vote = Vote(id, _data['title'])
         elif _data['_type'] == 'referendum':
             vote = Referendum(id, _data['title'])
+            vote.choices = []
         elif _data['_type'] == 'lawsuit':
             vote = Lawsuit(id, _data['title'])
+            vote.choices = []
         else:
-            vote = Vote('0', 'Unknown Vote', ())
+            vote = Vote('0', 'Unknown Vote')
 
-        vote.author = _data['author']
-        vote.startDate = _data['startDate']
-        vote.endDate = _data['endDate']
-        vote.choices = _data['choices']
+        vote.author = _data['author_id']
+        vote.startDate = _data['start_date']
+        vote.endDate = _data['end_date']
+
+        for opt in _data['choices']:
+            option = VoteOption(opt["id"], opt["title"])
+            option.count = opt["count"]
+
+            vote.choices.append(option)
 
         return vote
 
@@ -70,14 +82,19 @@ class RepublicInstance(Instance):
                     'referendum' if type(vote) == Referendum else\
                     'lawsuit' if type(vote) == Lawsuit else\
                     'unknown',
+            'id': NSID(vote.id),
             'title': vote.title,
-            'author': NSID(vote.author),
-            'startDate': vote.startDate,
-            'endDate': vote.endDate,
-            'choices': vote.choices
+            'author_id': NSID(vote.author),
+            'start_date': vote.startDate,
+            'end_date': vote.endDate,
+            'choices': [ opt.__dict__ for opt in vote.choices ]
         }
 
-        self._put_in_db('votes', _data)
+        if type(vote) == Lawsuit:
+            del _data['_type']
+            self._put_in_db('lawsuits', _data)
+        else:
+            self._put_in_db('votes', _data)
 
     # Aucune possibilité de supprimer un vote
 
@@ -103,19 +120,19 @@ class RepublicInstance(Instance):
 
         base = 'mandate' if current_mandate else 'archives'
 
-        _contributions = self.fetch(base, {'author': id, '_type': 'contrib'})
-        _mandates = self.fetch(base, {'target': id, '_type': 'election'}) +\
-                    self.fetch(base, {'target': id, '_type': 'promotion'})
+        _contributions = self.fetch(base, author = id, _type = 'contrib')
+        _mandates = self.fetch(base, target = id, _type = 'election') +\
+                    self.fetch(base, target = id, _type = 'promotion')
 
         user = Official(id)
         for mandate in _mandates:
-            if mandate['position'].startswith('MIN'):
-                mandate['position'] = 'MIN'
+            if mandate['details']['position'].startswith('MIN'):
+                mandate['details']['position'] = 'MIN'
 
             try:
-                user.mandates[mandate['position']] += 1
+                user.mandates[mandate['details']['position']] += 1
             except KeyError:
-                user.mandates[mandate['position']] = 1
+                user.mandates[mandate['details']['position']] = 1
 
         for contrib in _contributions:
             try:
@@ -134,14 +151,14 @@ class RepublicInstance(Instance):
         court = Court()
         police_forces = PoliceForces()
 
-        _get_position: list[dict] = lambda pos : self._select_from_db('functions', 'id', pos)['users']
+        _get_position: list[dict] = lambda pos : self._select_from_db('functions', 'id', pos)[0]['users']
 
-        admin.members = [ self.get_official(user['id']) for user in _get_position('ADMIN') ]
-        admin.president = self.get_official('F7DB60DD1C4300A') # happex (remplace Kheops pour l'instant)
+        admin.members = [ self.get_official(user) for user in _get_position('ADMIN') ]
+        admin.president = self.get_official(0xF7DB60DD1C4300A) # happex (remplace Kheops pour l'instant)
 
-        gov.president = self.get_official([0])
+        gov.president = self.get_official(0x0)
 
-        minister = lambda code : self.get_official(_get_position(f'MIN_{code}')[0]['id'])
+        minister = lambda code : self.get_official(_get_position(f'MIN_{code}')[0])
         gov.prime_minister = minister('PRIM')
         gov.economy_minister = minister('ECO')
         gov.inner_minister = minister('INN')
@@ -150,13 +167,13 @@ class RepublicInstance(Instance):
         gov.outer_minister = minister('OUT')
 
         assembly.president = self.get_official(_get_position('PRE_AS')[0])
-        assembly.members = [ self.get_official(user['id']) for user in _get_position('REPR') ]
+        assembly.members = [ self.get_official(user) for user in _get_position('REPR') ]
 
         court.president = gov.justice_minister
-        court.members = [ self.get_official(user['id']) for user in _get_position('JUDGE') ]
+        court.members = [ self.get_official(user) for user in _get_position('JUDGE') ]
 
         police_forces.president = gov.inner_minister
-        police_forces.members = [ self.get_official(user['id']) for user in _get_position('POLICE') ]
+        police_forces.members = [ self.get_official(user) for user in _get_position('POLICE') ]
 
         instits = State()
         instits.administration = admin
@@ -179,20 +196,20 @@ class RepublicInstance(Instance):
 
         get_ids = lambda institution : [ member.id for member in institutions.__getattribute__(institution).members ]
 
-        self._put_in_db('functions', { 'users': get_ids('administration') })
-        self._put_in_db('functions', { 'users': get_ids('assembly') })
-        self._put_in_db('functions', { 'users': get_ids('court') })
-        self._put_in_db('functions', { 'users': get_ids('police') })
+        self._put_in_db('functions', { 'id': 'ADMIN', 'users': get_ids('administration') })
+        self._put_in_db('functions', { 'id': 'REPR', 'users': get_ids('assembly') })
+        self._put_in_db('functions', { 'id': 'JUDGE', 'users': get_ids('court') })
+        self._put_in_db('functions', { 'id': 'POLICE', 'users': get_ids('police') })
 
-        self._put_in_db('functions', { 'users': [ institutions.assembly.president.id ] })
-        self._put_in_db('functions', { 'users': [ institutions.government.president.id ] })
+        self._put_in_db('functions', { 'id': 'PRE_AS', 'users': [ institutions.assembly.president.id ] })
+        self._put_in_db('functions', { 'id': 'PRE_REP', 'users': [ institutions.government.president.id ] })
 
-        self._put_in_db('functions', { 'users': [ institutions.government.prime_minister.id ] })
-        self._put_in_db('functions', { 'users': [ institutions.government.inner_minister.id ] })
-        self._put_in_db('functions', { 'users': [ institutions.government.justice_minister.id ] })
-        self._put_in_db('functions', { 'users': [ institutions.government.economy_minister.id ] })
-        self._put_in_db('functions', { 'users': [ institutions.government.press_minister.id ] })
-        self._put_in_db('functions', { 'users': [ institutions.government.outer_minister.id ] })
+        self._put_in_db('functions', { 'id': 'MIN_PRIM', 'users': [ institutions.government.prime_minister.id ] })
+        self._put_in_db('functions', { 'id': 'MIN_INN', 'users': [ institutions.government.inner_minister.id ] })
+        self._put_in_db('functions', { 'id': 'MIN_JUS', 'users': [ institutions.government.justice_minister.id ] })
+        self._put_in_db('functions', { 'id': 'MIN_ECO', 'users': [ institutions.government.economy_minister.id ] })
+        self._put_in_db('functions', { 'id': 'MIN_AUD', 'users': [ institutions.government.press_minister.id ] })
+        self._put_in_db('functions', { 'id': 'MIN_OUT', 'users': [ institutions.government.outer_minister.id ] })
 
     def new_mandate(self, institutions: State, weeks: int = 4) -> None:
         """
@@ -222,7 +239,7 @@ class RepublicInstance(Instance):
         elif type(archive) == Demotion:
             _data['_type'] = "demotion"
         else:
-            _data['_type'] = "action"
+            _data['_type'] = "unknown"
 
         self._put_in_db('archives', _data)
         self._put_in_db('mandate', _data) # Ajouter les archives à celle du mandat actuel
@@ -246,9 +263,9 @@ class RepublicInstance(Instance):
             return None
 
         if _data['_type'] == "election":
-            archive = Election(_data['author'], _data['target'], _data['position'])
+            archive = Election(_data['author'], _data['target'], _data['details']['position'])
         elif _data['_type'] == "promotion":
-            archive = Promotion(_data['author'], _data['target'], _data['position'])
+            archive = Promotion(_data['author'], _data['target'], _data['details']['position'])
         elif _data['_type'] == "demotion":
             archive = Demotion(_data['author'], _data['target'])
         else:

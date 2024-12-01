@@ -83,8 +83,12 @@ class EntityInstance(Instance):
 
                 entity.append(member)
 
+            entity.parts = []
+
+            for owner, attrs in _data['parts'].items():
+                entity.parts.extend(attrs['count'] * Share(NSID(owner), attrs['worth'] // attrs['count']))
+
             entity.certifications = _data['certifications']
-            entity.parts = _data['parts']
             entity.avatar = self._download_from_storage('organizations', f"avatars/{entity.id}")
         else:
             entity = Entity(id)
@@ -130,6 +134,7 @@ class EntityInstance(Instance):
             _data['owner_id'] = NSID(entity.owner.id) if entity.owner else NSID("0")
             _data['members'] = []
             _data['certifications'] = entity.certifications
+            _data['parts'] = entity.get_shares(True)
 
             for member in entity.members:
                 _member = {

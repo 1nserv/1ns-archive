@@ -133,19 +133,38 @@ class GroupMember(User):
 
         return p
 
+class Share:
+    def __getstate__(self) -> dict:
+        return {
+            "owner": self.owner,
+            "price": self.price
+        }
+
+    def __setstate__(self, state: dict):
+        self.owner: NSID = state['owner']
+        self.price: int = state['price']
+
+    def __init__(self, owner: NSID = NSID(0x0), price: int = 10):
+        self.owner: NSID = owner
+        self.price: int = price
+
+    def assign_owner(self, owner: NSID):
+        self.owner = owner
+
+    def set_price(self, price: int):
+        self.price = price
+
 class Organization(Entity):
     def __init__(self, id: str | NSID) -> None:
         super().__init__(NSID(id))
 
-        self.owner: Entity
+        self.owner: Entity = User(NSID(0x0))
         self.avatar: bytes = utils.open_asset('default_avatar.png')
 
         self.certifications: dict = {}
         self.members: list[GroupMember] = []
 
-        self.parts: dict[NSID, int] = {
-            self.id: 1
-        }
+        self.parts: list[Share] = 50 * [ Share(self.owner.id, 0) ]
 
     def add_certification(self, certification: str) -> None:
         self.certifications[certification] = round(time.time())
@@ -176,5 +195,26 @@ class Organization(Entity):
     def set_owner(self, member: User) -> None:
         self.owner = member
 
-    def get_member_id(self) -> list[str]:
-        return [ member.id for member in self.members ]
+    def get_members_by_attr(self, attribute: str = "id") -> list[str]:
+        return [ member.__getattribute__(attribute) for member in self.members ]
+
+    def get_shares(self, include_worth: bool = False) -> dict[str, int] | dict[str, dict[str, int]]:
+        shares = {}
+
+        for share in self.parts:
+            if include_worth:
+                if share.owner in shares.keys():
+                    shares[share.owner]['amount'] += 1
+                    shares[share.owner]['worth'] += share.price
+                else:
+                    shares[share.owner] = {
+                        'amount': 1,
+                        'worth': share.price
+                    }
+            else:
+                if share.owner in shares.keys():
+                    shares[share.owner] += 1
+                else:
+                    shares[share.owner] = 1
+
+        return shares

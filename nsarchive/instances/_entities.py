@@ -205,23 +205,21 @@ class EntityInstance(Instance):
         """
 
         id = NSID(id)
-        groups = self.fetch_entities(_type = 'organization')
+        _groups = self.fetch_entities(_type = 'organization')
+        groups = []
 
-        for group in groups:
+        for group in _groups:
             if group is None:
-                groups.remove(group)
                 continue
 
             if group.owner.id == id:
-                continue
+                groups.append(group)
 
             for member in group.members:
                 if member.id == id:
-                    break
-            else:
-                groups.remove(group)
+                    groups.append(group)
 
-        return [ group for group in groups if group is not None ]
+        return [ group for group in groups ]
 
     def get_position(self, id: str) -> Position:
         """

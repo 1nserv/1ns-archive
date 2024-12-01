@@ -72,8 +72,14 @@ class RepublicInstance(Instance):
 
         return vote
 
-    def save_vote(self, vote: Vote | Referendum | Lawsuit) -> None:
-        """Sauvegarde un vote dans la base de données."""
+    def save_vote(self, vote: Vote | Referendum | Lawsuit):
+        """
+        Sauvegarde un vote dans la base de données.
+
+        ## Paramètres
+        - vote: `.Vote`\n
+            Vote à sauvegarder
+        """
 
         vote.id = NSID(vote.id)
 
@@ -190,7 +196,7 @@ class RepublicInstance(Instance):
         Celle-ci met à jour: Le gouvernement (président, ministres), les différents députés et leur président, les différents juges, les différents policiers.\n
 
         ## Paramètres
-        institutions: `.Institutions`\n
+        institutions: `.State`\n
             Le nouvel état des institutions, à sauvegarder.
         """
 
@@ -211,9 +217,15 @@ class RepublicInstance(Instance):
         self._put_in_db('functions', { 'id': 'MIN_AUD', 'users': [ institutions.government.press_minister.id ] })
         self._put_in_db('functions', { 'id': 'MIN_OUT', 'users': [ institutions.government.outer_minister.id ] })
 
-    def new_mandate(self, institutions: State, weeks: int = 4) -> None:
+    def new_mandate(self, institutions: State, weeks: int = 4):
         """
         Fonction qui amène à supprimer toutes les archives du mandat précédent
+
+        ## Paramètres
+        - institutions: `.State`\n
+            Nouvel État à sauvegarder
+        - weeks: `int`\n
+            Nombre de semaines du mandat
         """
 
         for item in self.fetch('mandate'):
@@ -226,8 +238,14 @@ class RepublicInstance(Instance):
     ---- ARCHIVES ----
     """
 
-    def _add_archive(self, archive: Archive) -> None:
-        """Ajoute une archive d'une action (élection, promotion, ou rétrogradation) dans la base de données."""
+    def _add_archive(self, archive: Archive):
+        """
+        Ajoute une archive d'une action (élection, promotion, ou rétrogradation) dans la base de données.
+
+        ## Paramètres
+        - archive: `.Archive`\n
+            Archive à ajouter
+        """
 
         archive.id = NSID(archive.id)
         _data = archive.__dict__.copy()
@@ -283,7 +301,7 @@ class RepublicInstance(Instance):
         Récupère une liste d'archives correspondant à la requête.
 
         ## Paramètres
-        query: `dict`
+        query: `dict`\n
             Requête pour filtrer les archives.
 
         ## Renvoie

@@ -46,7 +46,13 @@ class EconomyInstance(Instance):
         return account
 
     def save_account(self, account: BankAccount):
-        """Sauvegarde un compte bancaire dans la base de données."""
+        """
+        Sauvegarde un compte bancaire dans la base de données.
+
+        ## Paramètres
+        - account: `.BankAccount`\n
+            Compte à sauvegarder
+        """
 
         _data = {
             'id': NSID(account.id),
@@ -60,7 +66,13 @@ class EconomyInstance(Instance):
         self._put_in_db('accounts', _data)
 
     def freeze_account(self, account: BankAccount):
-        """Gèle un compte bancaire pour empêcher toute transaction."""
+        """
+        Gèle un compte bancaire pour empêcher toute transaction.
+
+        ## Paramètres
+        - account: `.BankAccount`\n
+            Compte à geler
+        """
 
         account.id = NSID(account.id)
         account.frozen = True
@@ -71,7 +83,7 @@ class EconomyInstance(Instance):
     ---- OBJETS & VENTES ----
     """
 
-    def save_item(self, item: Item) -> None:
+    def save_item(self, item: Item):
         """
         Sauvegarde des infos à propos d'un item.
 
@@ -107,13 +119,13 @@ class EconomyInstance(Instance):
 
         return item
 
-    def delete_item(self, item: Item) -> None:
+    def delete_item(self, item: Item):
         """
         Annule le référencement d'un item.
 
         ## Paramètres
         item: `.Item`\n
-            Item à vendre
+            Item à supprimer
         """
 
         self._delete_by_ID('items', item.id)
@@ -127,7 +139,7 @@ class EconomyInstance(Instance):
             ID de la vente.
 
         ## Renvoie
-        - `.Sale | None`
+        - `.Sale | None`: Le résultat de la vente
         """
 
         id = NSID(id)
@@ -136,7 +148,7 @@ class EconomyInstance(Instance):
 
         if _data is None:
             return None
-        
+
         item = self.get_item(_data['id'])
 
         sale = Sale(NSID(id), Item(_data['id']) if item is None else item)
@@ -144,7 +156,7 @@ class EconomyInstance(Instance):
 
         return sale
 
-    def sell_item(self, item: Item, quantity: int, price: int, seller: NSID) -> None:
+    def sell_item(self, item: Item, quantity: int, price: int, seller: NSID):
         """
         Vend un item sur le marché.
 
@@ -187,7 +199,7 @@ class EconomyInstance(Instance):
             ID du propriétaire de l'inventaire
 
         ## Retourne
-        - `.Inventory | None`
+        - `.Inventory | None`: L'inventaire s'il a été trouvé
         """
 
         _data = self._get_by_ID('inventories', id)
@@ -204,7 +216,7 @@ class EconomyInstance(Instance):
 
         return inventory
 
-    def save_inventory(self, inventory: Inventory) -> None:
+    def save_inventory(self, inventory: Inventory):
         """
         Sauvegarder un inventaire
 
@@ -217,7 +229,7 @@ class EconomyInstance(Instance):
 
         self._put_in_db('inventories', _data)
 
-    def delete_inventory(self, inventory: Inventory) -> None:
+    def delete_inventory(self, inventory: Inventory):
         """
         Supprime un inventaire
 
@@ -233,7 +245,13 @@ class EconomyInstance(Instance):
     """
 
     def _add_archive(self, archive: Archive):
-        """Ajoute une archive d'une transaction ou d'une vente dans la base de données."""
+        """
+        Ajoute une archive d'une transaction ou d'une vente dans la base de données.
+
+        ## Paramètres
+        - archive: `.Archive`\n
+            Archive à ajouter
+        """
 
         archive.id = NSID(archive.id)
         archive.author = NSID(archive.author)

@@ -105,12 +105,12 @@ class EntityInstance(Instance):
 
         return entity
 
-    def save_entity(self, entity: Entity) -> None:
+    def save_entity(self, entity: Entity):
         """
         Fonction permettant de créer ou modifier une entité.
 
         ## Paramètres
-        entity: `.Entity` ( `.User | .Organization` )
+        entity: `.Entity`\n
             L'entité à sauvegarder
         """
 
@@ -152,12 +152,12 @@ class EntityInstance(Instance):
 
         self._put_in_db('individuals' if isinstance(entity, User) else 'organizations', _data)
 
-    def delete_entity(self, entity: Entity) -> None:
+    def delete_entity(self, entity: Entity):
         """
         Fonction permettant de supprimer le profil d'une entité
 
         ## Paramètres
-        entity: `.Entity` ( `.User | .Organization` )
+        entity: `.Entity`\n
             L'entité à supprimer
         """
 
@@ -168,11 +168,11 @@ class EntityInstance(Instance):
         Récupère une liste d'entités en fonction d'une requête.
 
         ## Paramètres
-        query: `dict`
+        query: `dict`\n
             La requête pour filtrer les entités.
 
         ## Renvoie
-        - `list[Entity | User | Organization]`
+        - `list[.Entity | .User | .Organization]`
         """
 
         if "_type" in query.keys():
@@ -197,11 +197,11 @@ class EntityInstance(Instance):
         Récupère les groupes auxquels appartient une entité.
 
         ## Paramètres
-        id: `NSID`
+        id: `NSID`\n
             ID de l'entité.
 
         ## Renvoie
-        - `list[Organization]`
+        - `list[.Organization]`
         """
 
         id = NSID(id)
@@ -228,7 +228,7 @@ class EntityInstance(Instance):
         Récupère une position légale (métier, domaine professionnel).
 
         ## Paramètres
-        id: `str`
+        id: `str`\n
             ID de la position (SENSIBLE À LA CASSE !)
 
         ## Renvoie
@@ -250,9 +250,13 @@ class EntityInstance(Instance):
     ---- ARCHIVES --
     """
 
-    def _add_archive(self, archive: Archive) -> None:
+    def _add_archive(self, archive: Archive):
         """
         Ajoute une archive d'une action (modification au sein d'un groupe ou sanction) dans la base de données.
+
+        ## Paramètres
+        - archive: `.Archive`\n
+            Archive à ajouter
         """
 
         archive.id = NSID(archive.id)
@@ -275,7 +279,7 @@ class EntityInstance(Instance):
         Récupère une archive spécifique.
 
         ## Paramètres
-        id: `NSID`
+        id: `NSID`\n
             ID de l'archive.
 
         ## Renvoie
@@ -307,7 +311,7 @@ class EntityInstance(Instance):
         Récupère une liste d'archives correspondant à la requête.
 
         ## Paramètres
-        query: `dict`
+        query: `dict`\n
             Requête pour filtrer les archives.
 
         ## Renvoie

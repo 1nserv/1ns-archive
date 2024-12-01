@@ -3,12 +3,42 @@ from nsarchive.cls.base import NSID
 # Votes
 
 class VoteOption:
+    """
+    Option disponible lors d'un vote
+
+    ## Attributs
+    - id: `str`\n
+        Identifiant de l'option
+    - title: `str`\n
+        Label de l'option
+    - count: `int`\n
+        Nombre de sympathisants pour cette option
+    """
+
     def __init__(self, id: str, title: str = None, count: int = 0):
         self.id = id
         self.title = title if title else id
         self.count = count
 
 class Vote:
+    """
+    Classe de référence pour les différents votes du serveur
+
+    ## Attributs
+    - id: `NSID`\n
+        Identifiant du vote
+    - title: `str`\n
+        Titre du vote
+    - choices: list[.VoteOption]\n
+        Liste des choix disponibles
+    - author: `NSID`\n
+        Identifiant de l'auteur du vote
+    - startDate: `int`\n
+        Date de début du vote
+    - endDate: `int`\n
+        Date limite pour voter
+    """
+
     def __init__(self, id: NSID, title: str) -> None:
         self.id: NSID = NSID(id)
         self.title: str = title
@@ -31,6 +61,10 @@ class Vote:
             return sorted_list
 
 class Referendum(Vote):
+    """
+    Vote à trois positions
+    """
+
     def __init__(self, id: NSID, title: str) -> None:
         super().__init__(id, title)
 
@@ -41,6 +75,10 @@ class Referendum(Vote):
         ]
 
 class Lawsuit(Vote):
+    """
+    Vote à trois positions pour un procès
+    """
+
     def __init__(self, id: NSID, title: str) -> None:
         super().__init__(id, title)
 

@@ -33,6 +33,18 @@ class PositionPermissions:
             self.__setattr__(*perm)
 
 class Position:
+    """
+    Position légale d'une entité
+
+    ## Attributs
+    - name: `str`\n
+        Titre de la position
+    - id: `str`\n
+        Identifiant de la position
+    - permissions: `.PositionPermissions`\n
+        Permissions accordées à l'utilisateur
+    """
+
     def __init__(self, id: str = 'inconnu') -> None:
         self.name: str = "Inconnue"
         self.id = id
@@ -42,6 +54,22 @@ class Position:
         return self.id
 
 class Entity:
+    """
+    Classe de référence pour les entités
+
+    ## Attributs
+    - id: `NSID`\n
+        Identifiant de l'entité
+    - name: `str`\n
+        Nom d'usage de l'entité
+    - registerDate: `int`\n
+        Date d'enregistrement de l'entité
+    - position: `.Position`\n
+        Position légale de l'entité
+    - additional: `dict`\n
+        Infos supplémentaires exploitables par les bots
+    """
+
     def __init__(self, id: NSID) -> None:
         self.id: NSID = NSID(id) # ID hexadécimal de l'entité (ou nom dans le cas de l'entreprise)
         self.name: str = "Entité Inconnue"
@@ -66,6 +94,21 @@ class Entity:
         del self.additional[key]
 
 class User(Entity):
+    """
+    Entité individuelle
+
+    ## Attributs
+    - Tous les attributs de la classe `.Entity`
+    - xp: `int`\n
+        Points d'expérience de l'entité
+    - boosts: `dict[str, int]`\n
+        Ensemble des boosts dont bénéficie l'entité
+    - permissions: `.PositionPermissions`\n
+        Fusion des permissions offertes par la position et les groupes
+    - votes: `list[NSID]`\n
+        Liste des votes auxquels a participé l'entité
+    """
+
     def __init__(self, id: NSID) -> None:
         super().__init__(NSID(id))
 
@@ -111,6 +154,15 @@ class MemberPermissions:
             self.__setattr__(*perm)
 
 class GroupMember(User):
+    """
+    Membre au sein d'une entité collective
+
+    ## Attributs
+    - Tous les attributs de la classe `.User`
+    - permission_level: `int`\n
+        Niveau d'accréditation du membre (0 = salarié, 4 = administrateur)
+    """
+
     def __init__(self, id: NSID) -> None:
         super().__init__(id)
 
@@ -134,6 +186,16 @@ class GroupMember(User):
         return p
 
 class Share:
+    """
+    Action d'une entreprise
+
+    ## Attributs
+    - owner: `NSID`\n
+        Identifiant du titulaire de l'action
+    - price: `int`\n
+        Prix de l'action
+    """
+
     def __getstate__(self) -> dict:
         return {
             "owner": self.owner,
@@ -155,6 +217,23 @@ class Share:
         self.price = price
 
 class Organization(Entity):
+    """
+    Entité collective
+
+    ## Attributs
+    - Tous les attributs de la classe `.Entity`
+    - owner: `.Entity`\n
+        Utilisateur ou entreprise propriétaire de l'entité collective
+    - avatar: `bytes`\n
+        Avatar/logo de l'entité collective
+    - certifications: `dict[str, int]`\n
+        Liste des certifications et de leur date d'ajout
+    - members: `list[.GroupMember]`\n
+        Liste des membres de l'entreprise
+    - parts: `list[.Share]`\n
+        Liste des actions émises par l'entreprise
+    """
+
     def __init__(self, id: NSID) -> None:
         super().__init__(NSID(id))
 

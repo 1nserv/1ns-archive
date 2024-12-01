@@ -3,7 +3,24 @@ import time
 from .base import *
 
 class Archive:
-    def __init__(self, author: NSID = '0', target: NSID = '0') -> None:
+    def __init__(self, author: NSID = '0', target: NSID = '0'):
+        """
+        Classe de référence pour toutes les archives.
+
+        ## Attributs de base
+        - date: `int`\n
+            Date (timestamp) de l'exécution de l'archive
+        - id: `NSID`\n
+            Clé d'identification des archives (basée sur la date)
+        - author: `NSID`\n
+            ID de l'auteur de l'action
+        - target: `NSID`:
+            ID de la cible de l'action
+        - action: `str`:\n
+            Action effectuée
+        - details: `dict`\n
+            Ensemble de détails que les différents bots peuvent utiliser
+        """
         self.date: int = round(time.time())
 
         self.id: NSID = NSID(self.date)

@@ -4,6 +4,11 @@ import typing
 from supabase import Client
 
 class NSID(str):
+    """
+    Nation Server ID
+
+    ID unique et universel pour l'ensemble des entités et évènements. Il prend les `int`, les `str` et les autres instances `NSID` pour les convertir en un identifiant hexadécimal.
+    """
     unknown = "0"
     admin = "1"
     gov = "2"
@@ -35,6 +40,9 @@ class NSID(str):
         return instance
 
 class Instance:
+    """
+    Instance qui servira de base à toutes les instances.
+    """
     def __init__(self, client: Client):
         self.db = client
 

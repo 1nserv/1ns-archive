@@ -3,7 +3,7 @@ import time
 from .base import *
 
 class Archive:
-    def __init__(self, author: str | NSID = '0', target: str | NSID = '0') -> None:
+    def __init__(self, author: NSID = '0', target: NSID = '0') -> None:
         self.date: int = round(time.time())
 
         self.id: NSID = NSID(self.date)
@@ -19,7 +19,7 @@ class Archive:
 # Entities
 
 class Sanction(Archive):
-    def __init__(self, author: str | NSID, target: str | NSID) -> None:
+    def __init__(self, author: NSID, target: NSID) -> None:
         super().__init__(author, target)
 
         self.details: dict = {
@@ -29,7 +29,7 @@ class Sanction(Archive):
         }
 
 class Report(Archive):
-    def __init__(self, author: str | NSID, target: str | NSID) -> None:
+    def __init__(self, author: NSID, target: NSID) -> None:
         super().__init__(author, target)
 
         self.details: dict = {
@@ -41,7 +41,7 @@ class Report(Archive):
 # Community
 
 class Election(Archive):
-    def __init__(self, author: str | NSID, target: str | NSID, position: str) -> None:
+    def __init__(self, author: NSID, target: NSID, position: str) -> None:
         super().__init__(author, target)
 
         self.details = {
@@ -51,7 +51,7 @@ class Election(Archive):
         }
 
 class Promotion(Archive):
-    def __init__(self, author: str | NSID, target: str | NSID, position: str) -> None:
+    def __init__(self, author: NSID, target: NSID, position: str) -> None:
         super().__init__(author, target)
 
         self.details = {
@@ -59,14 +59,14 @@ class Promotion(Archive):
         }
 
 class Demotion(Archive):
-    def __init__(self, author: str | NSID, target: str | NSID) -> None:
+    def __init__(self, author: NSID, target: NSID) -> None:
         super().__init__(author, target)
 
 
 # Bank
 
 class Transaction(Archive):
-    def __init__(self, author: str | NSID, target: str | NSID) -> None:
+    def __init__(self, author: NSID, target: NSID) -> None:
         super().__init__(author, target)
 
         self.details = {

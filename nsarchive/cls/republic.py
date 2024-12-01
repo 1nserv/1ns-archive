@@ -9,7 +9,7 @@ class VoteOption:
         self.count = count
 
 class Vote:
-    def __init__(self, id: str | NSID, title: str) -> None:
+    def __init__(self, id: NSID, title: str) -> None:
         self.id: NSID = NSID(id)
         self.title: str = title
         self.choices: list[VoteOption] = []
@@ -54,7 +54,7 @@ class Lawsuit(Vote):
 # Institutions (defs)
 
 class Official:
-    def __init__(self, id: str | NSID) -> None:
+    def __init__(self, id: NSID) -> None:
         self.id: NSID = NSID(id)
 
         self.mandates: int = {

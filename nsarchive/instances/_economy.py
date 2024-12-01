@@ -18,12 +18,12 @@ class EconomyInstance(Instance):
     ---- COMPTES EN BANQUE ----
     """
 
-    def get_account(self, id: str | NSID) -> BankAccount:
+    def get_account(self, id: NSID) -> BankAccount:
         """
         Récupère les informations d'un compte bancaire.
 
         ## Paramètres
-        id: `str | NSID`\n
+        id: `NSID`\n
             ID du compte.
 
         ## Renvoie
@@ -248,12 +248,12 @@ class EconomyInstance(Instance):
 
         self._put_in_db('archives', _data)
 
-    def _get_archive(self, id: str | NSID) -> Archive | Transaction:
+    def _get_archive(self, id: NSID) -> Archive | Transaction:
         """
         Récupère une archive spécifique.
 
         ## Paramètres
-        id: `str | NSID`\n
+        id: `NSID`\n
             ID de l'archive.
 
         ## Renvoie

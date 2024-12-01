@@ -26,12 +26,12 @@ class RepublicInstance(Instance):
     ---- VOTES & REFERENDUMS ----
     """
 
-    def get_vote(self, id: str | NSID) -> Vote | Referendum | Lawsuit:
+    def get_vote(self, id: NSID) -> Vote | Referendum | Lawsuit:
         """
         Récupère un vote spécifique.
 
         ## Paramètres
-        id: `str | NSID`\n
+        id: `NSID`\n
             ID du vote.
 
         ## Renvoie
@@ -102,12 +102,12 @@ class RepublicInstance(Instance):
     ---- INSTITUTION & MANDAT ----
     """
 
-    def get_official(self, id: str | NSID, current_mandate: bool = True) -> Official:
+    def get_official(self, id: NSID, current_mandate: bool = True) -> Official:
         """
         Récupère les informations d'un fonctionnaire (mandats, contributions).
 
         ## Paramètres
-        id: `str | NSID`\n
+        id: `NSID`\n
             ID du fonctionnaire.
         current_mandate: `bool`\n
             Indique si l'on doit récupérer le mandat actuel ou les anciens mandats.
@@ -244,12 +244,12 @@ class RepublicInstance(Instance):
         self._put_in_db('archives', _data)
         self._put_in_db('mandate', _data) # Ajouter les archives à celle du mandat actuel
 
-    def _get_archive(self, id: str | NSID) -> Archive | Election | Promotion | Demotion:
+    def _get_archive(self, id: NSID) -> Archive | Election | Promotion | Demotion:
         """
         Récupère une archive spécifique.
 
         ## Paramètres
-        id: `str | NSID`\n
+        id: `NSID`\n
             ID de l'archive.
 
         ## Renvoie

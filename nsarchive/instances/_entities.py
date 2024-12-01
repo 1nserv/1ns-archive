@@ -25,7 +25,7 @@ class EntityInstance(Instance):
     ---- ENTITÉS ----
     """
 
-    def get_entity(self, id: str | NSID) -> User | Organization | Entity:
+    def get_entity(self, id: NSID) -> User | Organization | Entity:
         """
         Fonction permettant de récupérer le profil public d'une entité.\n
 
@@ -192,12 +192,12 @@ class EntityInstance(Instance):
 
         return [ self.get_entity(NSID(entity['id'])) for entity in _res if entity is not None ]
 
-    def get_entity_groups(self, id: str | NSID) -> list[Organization]:
+    def get_entity_groups(self, id: NSID) -> list[Organization]:
         """
         Récupère les groupes auxquels appartient une entité.
 
         ## Paramètres
-        id: `str | NSID`
+        id: `NSID`
             ID de l'entité.
 
         ## Renvoie
@@ -270,12 +270,12 @@ class EntityInstance(Instance):
 
         self._put_in_db('archives', _data)
 
-    def _get_archive(self, id: str | NSID) -> Archive | Sanction:
+    def _get_archive(self, id: NSID) -> Archive | Sanction:
         """
         Récupère une archive spécifique.
 
         ## Paramètres
-        id: `str | NSID`
+        id: `NSID`
             ID de l'archive.
 
         ## Renvoie

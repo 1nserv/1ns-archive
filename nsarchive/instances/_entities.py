@@ -86,7 +86,7 @@ class EntityInstance(Instance):
             entity.parts = []
 
             for owner, attrs in _data['parts'].items():
-                entity.parts.extend(attrs['count'] * Share(NSID(owner), attrs['worth'] // attrs['count']))
+                entity.parts.extend(attrs['count'] * [ Share(NSID(owner), attrs['worth'] // attrs['count']) ])
 
             entity.certifications = _data['certifications']
             entity.avatar = self._download_from_storage('organizations', f"avatars/{entity.id}")

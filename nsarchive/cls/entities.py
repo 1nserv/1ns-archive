@@ -283,11 +283,11 @@ class Organization(Entity):
         for share in self.parts:
             if include_worth:
                 if share.owner in shares.keys():
-                    shares[share.owner]['amount'] += 1
+                    shares[share.owner]['count'] += 1
                     shares[share.owner]['worth'] += share.price
                 else:
                     shares[share.owner] = {
-                        'amount': 1,
+                        'count': 1,
                         'worth': share.price
                     }
             else:
